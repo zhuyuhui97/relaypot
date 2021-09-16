@@ -3,57 +3,66 @@ from twisted.python import log, failure, components
 from twisted.logger import Logger
 from twisted.internet import reactor
 from twisted.application.internet import TCPClient
+from twisted.internet.endpoints import TCP4ClientEndpoint
 
 import relaypot.factory
 from relaypot.util import create_endpoint_services
-
+from relaypot.backend import BackendFactory
 from relaypot.top_service import top_service
 
 
-class MyProtocol(Protocol):
+class FrontendProtocol(Protocol):
 
     log = Logger()
+    backend_prot = None
+    buf_to_send = []
 
     def connectionMade(self):
-        self.host_addr = self.transprt.getHost()
+        self.host_addr = self.transport.getHost()
         self.peer_addr = self.transport.getPeer()
         self.log.info("Got conn {addr} -> :{port}",
                       addr=self.peer_addr.host, port=self.host_addr.port)
-        self.setup_upstream()
+        self.setup_backend()
         # set session info here
         #self.make_upstream_conn()
 
     def connectionLost(self, reason: failure.Failure):
         self.log.info("Lost conn {addr} -> :{port}",
                       addr=self.peer_addr.host, port=self.host_addr.port)
-        self.close_upstream()
+        self.close_backend()
 
     def dataReceived(self, data: bytes):
         self.log.info("Got data {addr} -> :{port} = {data!r}",
                       addr=self.peer_addr.host, port=self.host_addr.port, data=data)
+        self.to_backend(data)      
         # reactor
-        self.start_service()
 
-    def setup_upstream(self):
-        self.upstream = TCPClient()
-        
-    def set_upstream(self, downstream):
-        self.downstream = downstream()
+    def setup_backend(self):
+        f = BackendFactory(self)
+        point = TCP4ClientEndpoint(reactor, 'localhost', 6667, timeout=20)
+        d = point.connect(f)
+        d.addCallback(self.on_backend_connected)
+        d.addErrback(self.on_backend_error)
+        # self.upstream = reactor.connectTCP("localhost", 6667, f)
+        # TODO 
 
-    def close_upstream(self):
+    def on_backend_connected(self, backend_trans):
+        log('123')
         pass
 
-    def send_upstream(self, buf):
+    def on_backend_error(self, reason):
         pass
 
-    def recv_upstream(self, buf):
-        self.transport.write(buf)
+    def set_backend_prot(self, b_prot):
+        self.backend_prot = b_prot
 
-    def start_service(self):
-        factory = relaypot.factory.MyFactory()
-        listen_endpoints = "tcp:2325:interface=0.0.0.0".split()
-        create_endpoint_services(reactor, top_service, listen_endpoints, factory)
-        pass
+    def close_backend(self):
+        if self.backend_prot != None:
+            self.backend_prot.transport.loseConnection()
 
-    def close_service(self):
-        pass
+    def to_backend(self, buf):
+        if self.backend_prot == None:
+            log.msg('buffering buf')
+            self.buf_to_send.append(buf)
+        else:
+            self.backend_prot.send_backend(buf)

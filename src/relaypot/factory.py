@@ -1,9 +1,9 @@
 from twisted.internet.protocol import Factory
-from relaypot.protocol import MyProtocol
+from relaypot.protocol import FrontendProtocol
 from typing import Callable, Optional, Tuple
 
-class MyFactory(Factory):
-    protocol = MyProtocol
+class HoneypotFactory(Factory):
+    protocol = FrontendProtocol
     # def buildProtocol(self, addr: Tuple[str, int]) -> "Protocol":
     #     return MyProtocol(addr)
 

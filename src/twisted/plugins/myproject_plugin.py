@@ -37,7 +37,7 @@ class MyServiceMaker(object):
         return self.topService
 
     def initProtocol(self):
-        factory = relaypot.factory.MyFactory() # TODO: Add here
+        factory = relaypot.factory.HoneypotFactory() # TODO: Add here
         factory.tac = self
         #factory.portal = portal.Portal(None) # TODO: Add credentical here
         #factory.portal.registerChecker(None)
