@@ -39,6 +39,8 @@ class FrontendProtocol(Protocol):
 
     def setup_backend(self):
         f = BackendFactory(self)
+        f.host_addr = self.host_addr
+        f.peer_addr = self.peer_addr
         point = TCP4ClientEndpoint(reactor, 'localhost', 6667, timeout=20)
         d = point.connect(f)
         d.addCallback(self.on_backend_connected)
@@ -47,7 +49,7 @@ class FrontendProtocol(Protocol):
         # TODO 
 
     def on_backend_connected(self, backend_trans):
-        log('123')
+        self.log.info('123')
         pass
 
     def on_backend_error(self, reason):
@@ -62,7 +64,7 @@ class FrontendProtocol(Protocol):
 
     def to_backend(self, buf):
         if self.backend_prot == None:
-            log.msg('buffering buf')
+            self.log.info('buffering buf')
             self.buf_to_send.append(buf)
         else:
             self.backend_prot.send_backend(buf)

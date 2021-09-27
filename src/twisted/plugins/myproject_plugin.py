@@ -18,7 +18,7 @@ from twisted.python import usage
 class Options(usage.Options):
     optParameters = [
         ["port", "p", "2323", "The port number to listen on."],
-        ["backend", "b", "http://pot-api.acg.wtf/", "The URL of backend."]
+        ["backend", "b", "pot-api.acg.wtf:6667", "The URL of backend."]
     ]
 
 @implementer(IServiceMaker, IPlugin)
