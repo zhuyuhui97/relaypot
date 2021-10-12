@@ -7,17 +7,17 @@ from twisted.internet.endpoints import TCP4ClientEndpoint
 
 import relaypot.factory
 from relaypot.util import create_endpoint_services
-from relaypot.backend import BackendFactory
+from relaypot.backend import BackendClientFactory
 from relaypot.top_service import top_service
 
 
 class FrontendProtocol(Protocol):
 
     log = Logger()
-    backend_prot = None
-    buf_to_send = []
 
     def connectionMade(self):
+        self.backend_prot = None
+        self.buf_to_send = []
         self.host_addr = self.transport.getHost()
         self.peer_addr = self.transport.getPeer()
         self.log.info("Got conn {addr} -> :{port}",
@@ -38,7 +38,7 @@ class FrontendProtocol(Protocol):
         # reactor
 
     def setup_backend(self):
-        f = BackendFactory(self)
+        f = BackendClientFactory(self)
         f.host_addr = self.host_addr
         f.peer_addr = self.peer_addr
         point = TCP4ClientEndpoint(reactor, 'localhost', 6667, timeout=20)

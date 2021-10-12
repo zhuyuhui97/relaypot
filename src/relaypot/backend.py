@@ -3,13 +3,15 @@ from twisted.python import log, failure, components
 from twisted.internet.protocol import ClientFactory, Protocol
 from typing import Tuple
 import json
-class BackendProtocol(Protocol):
 
+
+class BackendClientProtocol(Protocol):
 
     def __init__(self, factory, frontend) -> None:
         self.factory = factory
         self.frontend = frontend
         super().__init__()
+
     def connectionMade(self):
         # return super().connectionMade()
         self.frontend = self.factory.frontend
@@ -18,10 +20,12 @@ class BackendProtocol(Protocol):
                 self.send_backend(buf)
         self.frontend.set_backend_prot(self)
         self.transport.write(self.encode_info())
+
     def connectionLost(self, reason: failure.Failure):
         super().connectionLost(reason=reason)
         self.frontend.transport.loseConnection()
         pass
+
     def dataReceived(self, data: bytes):
         encoded = self.encode_buf(data)
         self.frontend.transport.write(encoded)
@@ -29,31 +33,39 @@ class BackendProtocol(Protocol):
 
     def send_backend(self, buf):
         self.transport.write(self.encode_buf(buf))
+
     def encode_info(self):
         obj = {
-            'ha': self.factory.host_addr.host,
-            'hp': self.factory.host_addr.port,
-            'aa': self.factory.peer_addr.host,
-            'ap': self.factory.peer_addr.port,
+            'dest_ip': self.factory.host_addr.host,
+            'dest_port': self.factory.host_addr.port,
+            'src_ip': self.factory.peer_addr.host,
+            'src_port': self.factory.peer_addr.port,
         }
-        return json.dumps(obj).encode() + b'\n'
+        return json.dumps(obj).encode() + b'\r\n'
 
     def encode_buf(self, buf):
-        return buf
-        #TODO
-        
+        escaped_buf = repr(buf)
+        obj = {
+            'length': len(buf),
+            'hashsum': '',
+            'buf': escaped_buf
+        }
+        return json.dumps(obj, ensure_ascii=False).encode()+b'\r\n'
+        # TODO
 
-class BackendFactory(ClientFactory):
+
+class BackendClientFactory(ClientFactory):
 
     def __init__(self, frontend) -> None:
         self.frontend = frontend
         super().__init__()
 
     def buildProtocol(self, addr: Tuple[str, int]) -> "Protocol":
-        return BackendProtocol(self, self.frontend)
+        return BackendClientProtocol(self, self.frontend)
+
 
 class UpstreamClient(TCPClient):
     def __init__(self, down_prot, *args, **kwargs):
         self.down_prot = down_prot
-        fup = BackendFactory(frontend=down_prot)
+        fup = BackendClientFactory(frontend=down_prot)
         super().__init__(fup, *args, **kwargs)

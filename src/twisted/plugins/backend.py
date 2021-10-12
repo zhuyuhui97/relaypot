@@ -8,16 +8,18 @@ from twisted.application.service import IServiceMaker
 from twisted.application import internet, service
 from twisted.internet import reactor
 
-import relaypot.factory
+import backend.factory
 # from relaypot.options import cmd_opt
 from backend.top_service import top_service
 from relaypot.util import create_endpoint_services
+import utils
+from utils.config import load_option
 
 from twisted.python import usage
 
 class Options(usage.Options):
     optParameters = [
-        
+        ["config", "c", "config.yaml", "Config file"],
         ["port", "p", "6667", "The port number to listen on."]
     ]
 
@@ -38,7 +40,10 @@ class MyServiceMaker(object):
         return self.topService
 
     def initProtocol(self, options):
-        factory = relaypot.factory.HoneypotFactory()  # TODO: Add here
+        # TODO Rewrite config loader
+        utils.options = options
+        load_option(options['config'])
+        factory = backend.factory.BackendServerFactory() # TODO: Add here
         factory.tac = self
         # factory.portal = portal.Portal(None) # TODO: Add credentical here
         # factory.portal.registerChecker(None)
