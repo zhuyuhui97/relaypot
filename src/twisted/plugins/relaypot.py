@@ -12,6 +12,8 @@ import relaypot.factory
 # from relaypot.options import cmd_opt
 from relaypot.top_service import top_service
 from relaypot.util import create_endpoint_services
+import utils
+from utils.config import load_option
 
 from twisted.python import usage
 
@@ -38,6 +40,7 @@ class MyServiceMaker(object):
         return self.topService
 
     def initProtocol(self, options):
+        utils.options = options
         factory = relaypot.factory.HoneypotFactory()  # TODO: Add here
         factory.tac = self
         # factory.portal = portal.Portal(None) # TODO: Add credentical here

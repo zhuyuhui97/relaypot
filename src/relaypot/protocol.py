@@ -9,13 +9,15 @@ import relaypot.factory
 from relaypot.util import create_endpoint_services
 from relaypot.backend import BackendClientFactory
 from relaypot.top_service import top_service
-
+import utils
 
 class FrontendProtocol(Protocol):
 
     log = Logger()
 
     def connectionMade(self):
+        self.backend_host = utils.options['backend'].split(':')[0]
+        self.backend_port = int(utils.options['backend'].split(':')[1])
         self.backend_prot = None
         self.buf_to_send = []
         self.host_addr = self.transport.getHost()
@@ -41,7 +43,7 @@ class FrontendProtocol(Protocol):
         f = BackendClientFactory(self)
         f.host_addr = self.host_addr
         f.peer_addr = self.peer_addr
-        point = TCP4ClientEndpoint(reactor, 'localhost', 6667, timeout=20)
+        point = TCP4ClientEndpoint(reactor, self.backend_host, self.backend_port, timeout=20)
         d = point.connect(f)
         d.addCallback(self.on_backend_connected)
         d.addErrback(self.on_backend_error)
