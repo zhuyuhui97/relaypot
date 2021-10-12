@@ -3,6 +3,7 @@ backend:
     es:
       host: es.host
       port: 9200
+      index: relaypot
       auth_user: user
       auth_pw: password
       auth_id: id
