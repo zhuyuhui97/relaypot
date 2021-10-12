@@ -18,6 +18,7 @@ class EsOutput:
         config = utils.global_config['backend']['server']['es']
         host = config['host']
         port = str(config['port'])
+        self.index = config['index']
 
         es_options: Dict[str, Any] = {
             # 'api_key' : ('Cf1wb3wB5zhXXict03zUA', 'G1NJYETDRayiIUIudt1ZR'),
