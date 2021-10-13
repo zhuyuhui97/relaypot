@@ -15,11 +15,11 @@ class BackendClientProtocol(Protocol):
     def connectionMade(self):
         # return super().connectionMade()
         self.frontend = self.factory.frontend
+        self.transport.write(self.encode_info())
+        self.frontend.set_backend_prot(self)
         if len(self.frontend.buf_to_send) != 0:
             for buf in self.frontend.buf_to_send:
                 self.send_backend(buf)
-        self.frontend.set_backend_prot(self)
-        self.transport.write(self.encode_info())
 
     def connectionLost(self, reason: failure.Failure):
         super().connectionLost(reason=reason)
