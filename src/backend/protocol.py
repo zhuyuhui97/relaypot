@@ -12,17 +12,20 @@ from relaypot.util import create_endpoint_services
 from backend.top_service import top_service
 from logger.encutils import LogEncoder
 
+from interaction.telnet import TelnetInteractor
 
 class BackendServerProtocol(LineOnlyReceiver):
 
     log = Logger()
     db_logger = LogEncoder
+    agent = TelnetInteractor()
 
     def connectionMade(self):
         self.buf_to_proc = []
         self.session_info = None
         self.sess_log = None
-        pass
+        self.transport.writeSequence(self.agent.send_init())
+        self.transport.write()
         # set session info here
         #self.make_upstream_conn()
 
@@ -54,6 +57,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         obj = json.loads(buf)
         msg_buf = eval(obj['buf'])
         self.sess_log.on_request(msg_buf)
+        return msg_buf
 
 
 
