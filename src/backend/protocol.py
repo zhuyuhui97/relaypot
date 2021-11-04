@@ -24,8 +24,9 @@ class BackendServerProtocol(LineOnlyReceiver):
         self.buf_to_proc = []
         self.session_info = None
         self.sess_log = None
-        self.transport.writeSequence(self.agent.send_init())
-        self.transport.write()
+        # self.transport.writeSequence(self.agent.send_init())
+        # self.transport.write()
+        self.send_response(self.agent.send_init())
         # set session info here
         #self.make_upstream_conn()
 
@@ -33,7 +34,8 @@ class BackendServerProtocol(LineOnlyReceiver):
         if self.session_info == None:
             self.decode_preamble(line)
         else:
-            self.decode_buf(line)
+            req = self.decode_buf(line)
+            self.send_response(self.agent.got_buffer(req))
         
 
     def connectionLost(self, reason: failure.Failure):
@@ -59,6 +61,9 @@ class BackendServerProtocol(LineOnlyReceiver):
         self.sess_log.on_request(msg_buf)
         return msg_buf
 
-
+    def send_response(self, buf_seq):
+        for buf in buf_seq:
+            self.sess_log.on_response(buf)
+            self.transport.write(buf)
 
 
