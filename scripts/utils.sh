@@ -22,7 +22,7 @@ init_dirs(){
 
 start(){
     if [ $1 = 'backend' ]; then
-        PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/backend.pid --logfile=$LOG_DIR/backend.log $BKMOD -p 6668
+        PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/backend_test.pid --logfile=$LOG_DIR/backend_test.log $BKMOD -p 6668
     else 
         PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/$1.pid --logfile=$LOG_DIR/$1.log $FRMOD -p $1 -b $BACKEND
     fi
