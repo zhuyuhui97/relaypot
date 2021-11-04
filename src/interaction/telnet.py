@@ -12,7 +12,9 @@ class TelnetInteractor():
         else:
             self.profile_name = profile_name
         self.profile_base = profile_base
+        self.load_profile()
         self.status = self.STATUS_REQ_USERNAME
+
 
     def load_profile(self):
         filepath = os.path.join(self.profile_base, self.profile_name)
