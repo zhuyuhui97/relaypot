@@ -12,33 +12,34 @@ from relaypot.util import create_endpoint_services
 from backend.top_service import top_service
 from logger.encutils import LogEncoder
 
+from agent.dummy import DummyAgent
+
 
 class BackendServerProtocol(LineOnlyReceiver):
 
     log = Logger()
     db_logger = LogEncoder
+    agent = DummyAgent
 
     def connectionMade(self):
         self.buf_to_proc = []
         self.session_info = None
         self.sess_log = None
-        pass
+        self.send_response(self.agent.on_init())
         # set session info here
-        #self.make_upstream_conn()
+        # self.make_upstream_conn()
 
     def lineReceived(self, line):
         if self.session_info == None:
             self.decode_preamble(line)
         else:
-            self.decode_buf(line)
-        
+            req = self.decode_buf(line)
+            self.send_response(self.agent.got_buffer(req))
 
     def connectionLost(self, reason: failure.Failure):
         self.log.info("Lost conn")
         if self.sess_log != None:
             self.sess_log.on_disconnected()
-
-
 
     def decode_preamble(self, buf):
         try:
@@ -49,12 +50,15 @@ class BackendServerProtocol(LineOnlyReceiver):
             self.transport.loseConnection()
         self.sess_log = self.db_logger(**self.session_info)
 
-
     def decode_buf(self, buf):
         obj = json.loads(buf)
         msg_buf = eval(obj['buf'])
         self.sess_log.on_request(msg_buf)
+        return msg_buf
 
-
-
-
+    def send_response(self, buf_seq):
+        if buf_seq == None:
+            return
+        for buf in buf_seq:
+            self.sess_log.on_response(buf)
+            self.transport.write(buf)
