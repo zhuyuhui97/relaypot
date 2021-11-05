@@ -45,4 +45,4 @@ class TelnetAgent(BaseAgent):
             return [self.get_resp(buf), '\n', self.ps]
 
     def get_resp(self, buf):
-        return 'sh: command not found: ' + buf.decoce().split()[0]
+        return 'sh: command not found: ' + buf.decode().split()[0]
