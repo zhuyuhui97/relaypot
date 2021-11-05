@@ -26,7 +26,6 @@ class BackendServerProtocol(LineOnlyReceiver):
         self.session_info = None
         self.sess_log = None
         self.agent = self.agent_cls()
-        self.send_response(self.agent.on_init())
         # set session info here
         # self.make_upstream_conn()
 
@@ -50,6 +49,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             log.err('Failed to parse preamble')
             self.transport.loseConnection()
         self.sess_log = self.db_logger(**self.session_info)
+        self.send_response(self.agent.on_init())
 
     def decode_buf(self, buf):
         obj = json.loads(buf)
