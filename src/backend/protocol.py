@@ -61,5 +61,6 @@ class BackendServerProtocol(LineOnlyReceiver):
         if buf_seq == None:
             return
         for buf in buf_seq:
-            self.sess_log.on_response(buf)
-            self.transport.write(buf.encode())
+            buf_enc = buf.encode()
+            self.sess_log.on_response(buf_enc)
+            self.transport.write(buf_enc)

@@ -8,6 +8,9 @@ class TelnetAgent(BaseAgent):
     STATUS_REQ_USERNAME = 0
     STATUS_REQ_PASSWORD = 1
     STATUS_REQ_COMMAND = 2
+    NOPRINT_TRANS_TABLE = {
+        i: None for i in range(0, sys.maxunicode + 1) if not chr(i).isprintable()
+    }
 
     def __init__(self, profile_name=None, profile_base='profiles'):
         plist = os.listdir(profile_base)
@@ -46,4 +49,4 @@ class TelnetAgent(BaseAgent):
             return [self.get_resp(buf), '\n', self.ps]
 
     def get_resp(self, buf):
-        return 'sh: command not found: ' + filter(lambda x: x in string.printable, buf).decode().split()[0]
+        return 'sh: command not found: ' + buf.translate(self.NOPRINT_TRANS_TABLE).decode().split()[0]
