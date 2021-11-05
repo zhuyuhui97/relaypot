@@ -9,7 +9,7 @@ class TelnetAgent(BaseAgent):
     STATUS_REQ_COMMAND = 2
 
     def __init__(self, profile_name=None, profile_base='profiles'):
-        plist = os.listdir()
+        plist = os.listdir(profile_base)
         if profile_name == None:
             rnd = random.randrange(0, len(plist))
             self.profile_name = plist[rnd]
