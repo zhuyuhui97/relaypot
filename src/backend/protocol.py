@@ -19,12 +19,13 @@ class BackendServerProtocol(LineOnlyReceiver):
 
     log = Logger()
     db_logger = LogEncoder
-    agent = TelnetAgent()
+    agent_cls = TelnetAgent
 
     def connectionMade(self):
         self.buf_to_proc = []
         self.session_info = None
         self.sess_log = None
+        self.agent = self.agent_cls()
         self.send_response(self.agent.on_init())
         # set session info here
         # self.make_upstream_conn()
