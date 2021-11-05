@@ -1,4 +1,4 @@
-RELAYPOT_HOME='/home/pot/relaypot'
+RELAYPOT_HOME=`pwd`
 FRMOD='relaypot'
 BKMOD='relaypot-backend'
 RUN_DIR='/var/run/relaypot'
