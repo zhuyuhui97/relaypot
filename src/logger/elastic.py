@@ -6,7 +6,7 @@ import utils
 
 
 class EsOutput:
-    index: str = 'relaypot_test2'
+    index: str = 'relaypot_test'
     pipeline: str = 'geoip'
     es: Any
 
