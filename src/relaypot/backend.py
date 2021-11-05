@@ -27,8 +27,7 @@ class BackendClientProtocol(Protocol):
         pass
 
     def dataReceived(self, data: bytes):
-        encoded = self.encode_buf(data)
-        self.frontend.transport.write(encoded)
+        self.frontend.transport.write(data)
         # return super().dataReceived(data)
 
     def send_backend(self, buf):
