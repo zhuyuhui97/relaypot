@@ -1,17 +1,12 @@
 backend:
-  server:
-    listen:
-      port: 6667
-    es:
-      host: es.host
-      port: 9200
-      index: relaypot
-      auth_user: user
-      auth_pw: password
-      auth_id: id
-      auth_apikey: key
-  client:
-    server:
-      host: backend.host
-      port: 6667
+  host: backend.host
+  port: 6667
+  es:
+    host: es.host
+    port: 9200
+    index: relaypot
+    auth_user: user
+    auth_pw: password
+    auth_id: id
+    auth_apikey: key
 

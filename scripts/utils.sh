@@ -4,9 +4,6 @@ BKMOD='relaypot-backend'
 RUN_DIR='/var/run/relaypot'
 LOG_DIR='/var/log/relaypot'
 
-mkdir -p $RUN_DIR
-
-. $RELAYPOT_HOME/scripts/config
 
 init_dirs(){
     if [ ! -d $RUN_DIR ]; then

@@ -49,7 +49,7 @@ class MyServiceMaker(object):
         # factory.portal = portal.Portal(None) # TODO: Add credentical here
         # factory.portal.registerChecker(None)
         # listen_port = options['port']
-        listen_port = utils.global_config['backend']['server']['listen']['port']
+        listen_port = utils.global_config['backend']['port']
         listen_endpoints = ["tcp:{}:interface=0.0.0.0".format(
             listen_port)]  # TODO: Add here
         create_endpoint_services(
