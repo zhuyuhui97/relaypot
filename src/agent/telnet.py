@@ -47,5 +47,5 @@ class TelnetAgent(BaseAgent):
             return [self.get_resp(buf), '\n', self.ps]
 
     def get_resp(self, buf):
-        printable_buf = buf.translate(self.NON_PRINTABLE)
+        printable_buf = buf.translate({character:None for character in self.NON_PRINTABLE})
         return 'sh: command not found: ' + printable_buf.decode().split()[0]
