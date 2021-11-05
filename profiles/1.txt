@@ -1,4 +1,4 @@
-Welcome!
-Username:
-Password:
-> 
+'Welcome!'
+'Username:'
+'Password:'
+'> '
