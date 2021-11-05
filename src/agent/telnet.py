@@ -1,4 +1,5 @@
 import os
+import string
 import random
 import itertools
 from agent.base import BaseAgent
@@ -47,5 +48,8 @@ class TelnetAgent(BaseAgent):
             return [self.get_resp(buf), '\n', self.ps]
 
     def get_resp(self, buf):
-        printable_buf = buf.translate({character:None for character in self.NON_PRINTABLE})
+        printable_buf = ''
+        for char in buf:
+            if char in string.printable:
+                printable_buf = printable_buf + char
         return 'sh: command not found: ' + printable_buf.decode().split()[0]
