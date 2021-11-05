@@ -1,6 +1,6 @@
-import os, sys
+import os
 import random
-import string
+import itertools
 from agent.base import BaseAgent
 
 
@@ -8,9 +8,7 @@ class TelnetAgent(BaseAgent):
     STATUS_REQ_USERNAME = 0
     STATUS_REQ_PASSWORD = 1
     STATUS_REQ_COMMAND = 2
-    NOPRINT_TRANS_TABLE = {
-        i: None for i in range(0, sys.maxunicode + 1) if not chr(i).isprintable()
-    }
+    NON_PRINTABLE = itertools.chain(range(0x00,0x20),range(0x7f,0xa0))
 
     def __init__(self, profile_name=None, profile_base='profiles'):
         plist = os.listdir(profile_base)
@@ -49,4 +47,5 @@ class TelnetAgent(BaseAgent):
             return [self.get_resp(buf), '\n', self.ps]
 
     def get_resp(self, buf):
-        return 'sh: command not found: ' + buf.translate(self.NOPRINT_TRANS_TABLE).decode().split()[0]
+        printable_buf = buf.translate(self.NON_PRINTABLE)
+        return 'sh: command not found: ' + printable_buf.decode().split()[0]
