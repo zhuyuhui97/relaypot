@@ -9,7 +9,7 @@ class TelnetAgent(BaseAgent):
     STATUS_REQ_USERNAME = 0
     STATUS_REQ_PASSWORD = 1
     STATUS_REQ_COMMAND = 2
-    NON_PRINTABLE = itertools.chain(range(0x00,0x20),range(0x7f,0xa0))
+    NON_PRINTABLE = itertools.chain(range(0x00, 0x20), range(0x7f, 0xa0))
 
     def __init__(self, profile_name=None, profile_base='profiles'):
         plist = os.listdir(profile_base)
@@ -48,8 +48,5 @@ class TelnetAgent(BaseAgent):
             return [self.get_resp(buf), '\n', self.ps]
 
     def get_resp(self, buf):
-        printable_buf = ''
-        for char in buf:
-            if char in string.printable:
-                printable_buf = printable_buf + char
-        return 'sh: command not found: ' + printable_buf.decode().split()[0]
+        # TODO How to display commands when there are non-unicode bytes?
+        return 'sh: command not found.'
