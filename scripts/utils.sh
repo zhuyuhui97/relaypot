@@ -20,7 +20,7 @@ start() {
     if [ ! -z $2 ]; then
         CFG_PARAM="-c $2"
     fi
-    echo $1 | grep 'backend' 
+    echo $1 | grep 'backend' >/dev/null 2>/dev/null
     if [ $? -eq 0 ]; then # If $1 contains 'backend', run backend but give a special name for running files.
         PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/$1.pid --logfile=$LOG_DIR/$1.log $BKMOD $CFG_PARAM
     else
