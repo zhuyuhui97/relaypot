@@ -4,11 +4,7 @@ BKMOD='relaypot-backend'
 RUN_DIR='/var/run/relaypot'
 LOG_DIR='/var/log/relaypot'
 
-mkdir -p $RUN_DIR
-
-. $RELAYPOT_HOME/scripts/config
-
-init_dirs(){
+init_dirs() {
     if [ ! -d $RUN_DIR ]; then
         sudo mkdir -p $RUN_DIR
         sudo chown pot:pot $RUN_DIR
@@ -20,20 +16,23 @@ init_dirs(){
     fi
 }
 
-start(){
-    if [ $1 = 'backend' ]; then
-        PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/backend_test.pid --logfile=$LOG_DIR/backend_test.log $BKMOD -p 6668
-    else 
-        PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/$1.pid --logfile=$LOG_DIR/$1.log $FRMOD -p $1 -b $BACKEND
+start() {
+    if [ ! -z $2 ]; then
+        CFG_PARAM="-c $2"
+    fi
+    echo $1 | grep 'backend' >/dev/null 2>/dev/null
+    if [ $? -eq 0 ]; then # If $1 contains 'backend', run backend but give a special name for running files.
+        PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/$1.pid --logfile=$LOG_DIR/$1.log $BKMOD $CFG_PARAM
+    else
+        PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/$1.pid --logfile=$LOG_DIR/$1.log $FRMOD -p $1 $CFG_PARAM
     fi
 }
 
-
-stop(){
-    kill `cat $RUN_DIR/$1.pid`
+stop() {
+    kill $(cat $RUN_DIR/$1.pid)
 }
 
-watch_log(){
+watch() {
     tail -f $LOG_DIR/$1.log
 }
 

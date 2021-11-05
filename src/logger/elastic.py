@@ -15,7 +15,7 @@ class EsOutput:
             #TODO raise another exception
             raise Exception
 
-        config = utils.global_config['backend']['server']['es']
+        config = utils.global_config['backend']['es']
         host = config['host']
         port = str(config['port'])
         self.index = config['index']

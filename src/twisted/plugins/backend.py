@@ -17,11 +17,12 @@ from utils.config import load_option
 
 from twisted.python import usage
 
+
 class Options(usage.Options):
     optParameters = [
-        ["config", "c", "config.yaml", "Config file"],
-        ["port", "p", "6667", "The port number to listen on."]
+        ["config", "c", "config.yaml", "Config file"]
     ]
+
 
 @implementer(IServiceMaker, IPlugin)
 class MyServiceMaker(object):
@@ -43,12 +44,14 @@ class MyServiceMaker(object):
         # TODO Rewrite config loader
         utils.options = options
         load_option(options['config'])
-        factory = backend.factory.BackendServerFactory() # TODO: Add here
+        factory = backend.factory.BackendServerFactory()  # TODO: Add here
         factory.tac = self
         # factory.portal = portal.Portal(None) # TODO: Add credentical here
         # factory.portal.registerChecker(None)
-        listen_port = options['port']
-        listen_endpoints = ["tcp:{}:interface=0.0.0.0".format(listen_port)]  # TODO: Add here
+        # listen_port = options['port']
+        listen_port = utils.global_config['backend']['port']
+        listen_endpoints = ["tcp:{}:interface=0.0.0.0".format(
+            listen_port)]  # TODO: Add here
         create_endpoint_services(
             reactor,
             self.topService,

@@ -16,8 +16,8 @@ class FrontendProtocol(Protocol):
     log = Logger()
 
     def connectionMade(self):
-        self.backend_host = utils.options['backend'].split(':')[0]
-        self.backend_port = int(utils.options['backend'].split(':')[1])
+        self.backend_host = utils.global_config['backend']['host']
+        self.backend_port = utils.global_config['backend']['port']
         self.backend_prot = None
         self.buf_to_send = []
         self.host_addr = self.transport.getHost()
