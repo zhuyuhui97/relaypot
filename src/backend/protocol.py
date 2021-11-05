@@ -34,7 +34,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             self.decode_preamble(line)
         else:
             req = self.decode_buf(line)
-            self.send_response(self.agent.got_buffer(req))
+            self.send_response(self.agent.on_request(req))
 
     def connectionLost(self, reason: failure.Failure):
         self.log.info("Lost conn")
