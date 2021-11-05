@@ -1,5 +1,7 @@
 backend:
   server:
+    listen:
+      port: 6667
     es:
       host: es.host
       port: 9200

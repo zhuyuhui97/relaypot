@@ -20,7 +20,7 @@ from twisted.python import usage
 class Options(usage.Options):
     optParameters = [
         ["port", "p", "2323", "The port number to listen on."],
-        ["backend", "b", "pot-api.acg.wtf:6667", "The URL of backend."]
+        ["config", "c", "config.yaml", "Config file"]
     ]
 
 @implementer(IServiceMaker, IPlugin)
@@ -41,6 +41,7 @@ class MyServiceMaker(object):
 
     def initProtocol(self, options):
         utils.options = options
+        load_option(options['config'])
         factory = relaypot.factory.HoneypotFactory()  # TODO: Add here
         factory.tac = self
         # factory.portal = portal.Portal(None) # TODO: Add credentical here

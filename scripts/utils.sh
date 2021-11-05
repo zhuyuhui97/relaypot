@@ -21,10 +21,14 @@ init_dirs(){
 }
 
 start(){
+    if [ ! -z $2 ]; then
+            CFG_PARAM="-c $2"
+    fi
     if [ $1 = 'backend' ]; then
-        PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/backend.pid --logfile=$LOG_DIR/backend.log $BKMOD
+        
+        PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/backend.pid --logfile=$LOG_DIR/backend.log $BKMOD $CFG_PARAM
     else 
-        PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/$1.pid --logfile=$LOG_DIR/$1.log $FRMOD -p $1 -b $BACKEND
+        PYTHONPATH=$RELAYPOT_HOME/src twistd --pidfile=$RUN_DIR/$1.pid --logfile=$LOG_DIR/$1.log $FRMOD -p $1 $CFG_PARAM
     fi
 }
 
@@ -33,7 +37,7 @@ stop(){
     kill `cat $RUN_DIR/$1.pid`
 }
 
-watch_log(){
+watch(){
     tail -f $LOG_DIR/$1.log
 }
 
