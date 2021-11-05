@@ -12,14 +12,14 @@ from relaypot.util import create_endpoint_services
 from backend.top_service import top_service
 from logger.encutils import LogEncoder
 
-from agent.telnet import TelnetAgent
+from agent.dummy import DummyAgent
 
 
 class BackendServerProtocol(LineOnlyReceiver):
 
     log = Logger()
     db_logger = LogEncoder
-    agent_cls = TelnetAgent
+    agent_cls = DummyAgent
 
     def connectionMade(self):
         self.buf_to_proc = []
