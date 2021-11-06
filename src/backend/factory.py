@@ -1,7 +1,8 @@
 from twisted.internet.protocol import Factory
 from backend.protocol import BackendServerProtocol
 from typing import Callable, Optional, Tuple
-from utils import global_config
+import utils
+from pydoc import locate
 
 
 class BackendServerFactory(Factory):
@@ -13,8 +14,9 @@ class BackendServerFactory(Factory):
     def get_agent_class(self):
         klass = None
         try:
-            self.agent_name = global_config['backend']['agent']
-            klass = __import__('agent.'+self.agent_name).Agent
+            self.agent_name = utils.global_config['backend']['agent']
+            cls_name = 'agent.' + self.agent_name + '.Agent'
+            klass = locate(cls_name)
         except:
-            klass = __import__('agent.dummmy').Agent
+            klass = locate('agent.dummy.Agent')
         return klass

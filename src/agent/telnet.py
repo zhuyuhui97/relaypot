@@ -2,7 +2,7 @@ import os
 import string
 import random
 import itertools
-from agent.base import Agent
+from agent.base import BaseAgent
 
 
 class Agent(BaseAgent):
