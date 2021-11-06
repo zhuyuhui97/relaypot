@@ -9,7 +9,7 @@ class BackendServerFactory(Factory):
     protocol = BackendServerProtocol
 
     def __init__(self) -> None:
-        self.agent_cls = self.get_agent_class
+        self.agent_cls = self.get_agent_class()
 
     def get_agent_class(self):
         klass = None
