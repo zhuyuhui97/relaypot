@@ -12,20 +12,17 @@ from relaypot.util import create_endpoint_services
 from backend.top_service import top_service
 from logger.encutils import LogEncoder
 
-from agent.dummy import DummyAgent
-
 
 class BackendServerProtocol(LineOnlyReceiver):
 
     log = Logger()
     db_logger = LogEncoder
-    agent_cls = DummyAgent
 
     def connectionMade(self):
         self.buf_to_proc = []
         self.session_info = None
         self.sess_log = None
-        self.agent = self.agent_cls()
+        self.agent = self.factory.agent_cls()
         # set session info here
         # self.make_upstream_conn()
 

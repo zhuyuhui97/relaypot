@@ -1,7 +1,7 @@
 from agent.base import BaseAgent
 
 
-class DummyAgent(BaseAgent):
+class Agent(BaseAgent):
     def __init__(self):
         return None
 

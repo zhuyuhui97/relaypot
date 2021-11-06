@@ -2,10 +2,10 @@ import os
 import string
 import random
 import itertools
-from agent.base import BaseAgent
+from agent.base import Agent
 
 
-class TelnetAgent(BaseAgent):
+class Agent(BaseAgent):
     STATUS_REQ_USERNAME = 0
     STATUS_REQ_PASSWORD = 1
     STATUS_REQ_COMMAND = 2

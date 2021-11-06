@@ -9,4 +9,5 @@ backend:
     auth_pw: password
     auth_id: id
     auth_apikey: key
+  agent: dummy
 
