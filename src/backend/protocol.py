@@ -67,6 +67,8 @@ class BackendServerProtocol(LineOnlyReceiver):
         except Exception as e:
             self.twlog.error(
                 'Failed to parse preamble: buf={buf}, e={e}', buf=buf, e=e)
+                
+            self.twlog.error(traceback.format_exc())
             self.transport.loseConnection()
 
     def decode_buf(self, buf):
