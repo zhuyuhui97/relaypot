@@ -33,11 +33,11 @@ class BackendClientProtocol(Protocol):
         self.fproto.transport.loseConnection()
 
     def dataReceived(self, data: bytes):
-        self.twlog.info('{peer_addr} <- :{fproto_port} -- {buf}', peer_addr=self.peer_addr.host, fproto_host=str(self.host_addr.port), buf=data)
+        self.twlog.info('{peer_addr} <- :{fproto_port} -- {buf}', peer_addr=self.peer_addr.host, fproto_port=str(self.host_addr.port), buf=data)
         self.fproto.transport.write(data)
 
     def send_backend(self, buf):
-        self.twlog.info('{peer_addr} -> :{fproto_port} -- {buf}', peer_addr=self.peer_addr.host, fproto_host=str(self.host_addr.port), buf=buf)
+        self.twlog.info('{peer_addr} -> :{fproto_port} -- {buf}', peer_addr=self.peer_addr.host, fproto_port=str(self.host_addr.port), buf=buf)
         self.transport.write(self.encode_buf(buf))
 
     def encode_info(self):
