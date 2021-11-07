@@ -19,7 +19,7 @@ class BackendClientProtocol(Protocol):
 
     def connectionMade(self):
         self.back_addr = self.transport.getPeer()
-        self.twlog.info('Made backend connection {bhost}:{port}.', bhost=self.back_addr.host, port=self.back_addr.host)
+        self.twlog.info('Made backend connection {bhost}:{port}.', bhost=self.back_addr.host, port=self.back_addr.port)
         self.transport.write(self.encode_info()) # TODO
         if len(self.fproto.buf_to_send) != 0:
             self.twlog.info('Sending {} buffered bytes.'.format(str(len(self.fproto.buf_to_send))))
@@ -28,16 +28,16 @@ class BackendClientProtocol(Protocol):
             self.fproto.buf_to_send.clear()
 
     def connectionLost(self, reason: failure.Failure):
-        self.twlog.info('Lost backend connection {bhost}:{port}.', bhost=self.back_addr.host, port=self.back_addr.host)
+        self.twlog.info('Lost backend connection {bhost}:{port}.', bhost=self.back_addr.host, port=self.back_addr.port)
         super().connectionLost(reason=reason)
         self.fproto.transport.loseConnection()
 
     def dataReceived(self, data: bytes):
-        self.twlog.info('{peer_addr} <- :{fproto_port} -- {buf}', peer_addr=self.peer_addr.host, fproto_host=self.host_addr.port, buf=data)
+        self.twlog.info('{peer_addr} <- :{fproto_port} -- {buf}', peer_addr=self.peer_addr.host, fproto_host=str(self.host_addr.port), buf=data)
         self.fproto.transport.write(data)
 
     def send_backend(self, buf):
-        self.twlog.info('{peer_addr} -> :{fproto_port} -- {buf}', peer_addr=self.peer_addr.host, fproto_host=self.host_addr.port, buf=buf)
+        self.twlog.info('{peer_addr} -> :{fproto_port} -- {buf}', peer_addr=self.peer_addr.host, fproto_host=str(self.host_addr.port), buf=buf)
         self.transport.write(self.encode_buf(buf))
 
     def encode_info(self):
