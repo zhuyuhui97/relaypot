@@ -9,7 +9,6 @@ from twisted.application import internet, service
 from twisted.internet import reactor
 
 import relaypot.factory
-# from relaypot.options import cmd_opt
 from relaypot.top_service import top_service
 from relaypot.util import create_endpoint_services
 import utils

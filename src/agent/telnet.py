@@ -1,7 +1,8 @@
 import os
-import string
 import random
 import itertools
+from twisted.internet import protocol
+from twisted.python import failure
 from agent.base import BaseAgent
 
 
@@ -11,7 +12,7 @@ class Agent(BaseAgent):
     STATUS_REQ_COMMAND = 2
     NON_PRINTABLE = itertools.chain(range(0x00, 0x20), range(0x7f, 0xa0))
 
-    def __init__(self, profile_name=None, profile_base='profiles'):
+    def __init__(self, fproto:protocol.Protocol, profile_name=None, profile_base='profiles'):
         plist = os.listdir(profile_base)
         if profile_name == None:
             rnd = random.randrange(0, len(plist))
@@ -46,6 +47,12 @@ class Agent(BaseAgent):
             return [self.ps]
         else:
             return [self.get_resp(buf), '\n', self.ps]
+
+    def on_front_lost(self, reason: failure.Failure):
+        return None
+
+    def on_agent_lost(self):
+        return None
 
     def get_resp(self, buf):
         # TODO How to display commands when there are non-unicode bytes?

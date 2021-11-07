@@ -13,7 +13,6 @@ class BackendClientProtocol(Protocol):
         super().__init__()
 
     def connectionMade(self):
-        # return super().connectionMade()
         self.frontend = self.factory.frontend
         self.transport.write(self.encode_info())
         self.frontend.set_backend_prot(self)
@@ -24,11 +23,9 @@ class BackendClientProtocol(Protocol):
     def connectionLost(self, reason: failure.Failure):
         super().connectionLost(reason=reason)
         self.frontend.transport.loseConnection()
-        pass
 
     def dataReceived(self, data: bytes):
         self.frontend.transport.write(data)
-        # return super().dataReceived(data)
 
     def send_backend(self, buf):
         self.transport.write(self.encode_buf(buf))

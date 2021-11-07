@@ -47,7 +47,6 @@ class FrontendProtocol(Protocol):
         d = point.connect(f)
         d.addCallback(self.on_backend_connected)
         d.addErrback(self.on_backend_error)
-        # self.upstream = reactor.connectTCP("localhost", 6667, f)
         # TODO 
 
     def on_backend_connected(self, backend_trans):

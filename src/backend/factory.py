@@ -17,6 +17,6 @@ class BackendServerFactory(Factory):
             self.agent_name = utils.global_config['backend']['agent']
             cls_name = 'agent.' + self.agent_name + '.Agent'
             klass = locate(cls_name)
-        except:
+        except Exception as e:
             klass = locate('agent.dummy.Agent')
         return klass

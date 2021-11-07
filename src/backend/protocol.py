@@ -22,7 +22,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         self.buf_to_proc = []
         self.session_info = None
         self.sess_log = None
-        self.agent = self.factory.agent_cls()
+        self.agent = self.factory.agent_cls(self)
         # set session info here
         # self.make_upstream_conn()
 
@@ -34,6 +34,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             self.send_response(self.agent.on_request(req))
 
     def connectionLost(self, reason: failure.Failure):
+        self.agent.on_front_lost(reason)
         self.log.info("Lost conn")
         if self.sess_log != None:
             self.sess_log.on_disconnected()
@@ -42,7 +43,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         try:
             self.session_info = json.loads(buf)
             # self.log.info('got conn from ' + str(buf['src_addr']))
-        except:
+        except Exception as e:
             log.err('Failed to parse preamble')
             self.transport.loseConnection()
         self.sess_log = self.db_logger(**self.session_info)
@@ -58,6 +59,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         if buf_seq == None:
             return
         for buf in buf_seq:
-            buf_enc = buf.encode()
-            self.sess_log.on_response(buf_enc)
-            self.transport.write(buf_enc)
+            if buf is str:
+                buf = buf.encode()
+            self.sess_log.on_response(buf)
+            self.transport.write(buf)
