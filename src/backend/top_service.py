@@ -1,3 +1,3 @@
-from twisted.application import internet, service
+from twisted.application import service
 
 top_service = service.MultiService()

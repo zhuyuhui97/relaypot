@@ -1,12 +1,9 @@
 from twisted.internet.protocol import Protocol
-from twisted.python import log, failure, components
+from twisted.python import failure
 from twisted.logger import Logger
 from twisted.internet import reactor
-from twisted.application.internet import TCPClient
 from twisted.internet.endpoints import TCP4ClientEndpoint
-import backend
 
-import relaypot.factory
 from relaypot.util import create_endpoint_services
 from relaypot.backend import BackendClientFactory
 from relaypot.top_service import top_service

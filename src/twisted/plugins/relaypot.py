@@ -1,26 +1,23 @@
-from threading import Thread
-
 from zope.interface import implementer
-
 from twisted.plugin import IPlugin
 from twisted.cred import portal
 from twisted.application.service import IServiceMaker
-from twisted.application import internet, service
+from twisted.application import service
 from twisted.internet import reactor
-
-import relaypot.factory
+from twisted.python import usage
+from relaypot.factory import HoneypotFactory
 from relaypot.top_service import top_service
 from relaypot.util import create_endpoint_services
-import utils
 from utils.config import load_option
+import utils
 
-from twisted.python import usage
 
 class Options(usage.Options):
     optParameters = [
         ["port", "p", "2323", "The port number to listen on."],
         ["config", "c", "config.yaml", "Config file"]
     ]
+
 
 @implementer(IServiceMaker, IPlugin)
 class MyServiceMaker(object):
@@ -41,12 +38,13 @@ class MyServiceMaker(object):
     def initProtocol(self, options):
         utils.options = options
         load_option(options['config'])
-        factory = relaypot.factory.HoneypotFactory()  # TODO: Add here
+        factory = HoneypotFactory()  # TODO: Add here
         factory.tac = self
         # factory.portal = portal.Portal(None) # TODO: Add credentical here
         # factory.portal.registerChecker(None)
         listen_port = options['port']
-        listen_endpoints = ["tcp:{}:interface=0.0.0.0".format(listen_port)]  # TODO: Add here
+        listen_endpoints = ["tcp:{}:interface=0.0.0.0".format(
+            listen_port)]  # TODO: Add here
         create_endpoint_services(
             reactor,
             self.topService,

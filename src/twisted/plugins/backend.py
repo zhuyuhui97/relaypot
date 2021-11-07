@@ -1,21 +1,15 @@
-from threading import Thread
-
 from zope.interface import implementer
-
 from twisted.plugin import IPlugin
 from twisted.cred import portal
 from twisted.application.service import IServiceMaker
-from twisted.application import internet, service
+from twisted.application import service
 from twisted.internet import reactor
-
-import backend.factory
-# from relaypot.options import cmd_opt
-from backend.top_service import top_service
-from relaypot.util import create_endpoint_services
-import utils
-from utils.config import load_option
-
 from twisted.python import usage
+from backend.factory import BackendServerFactory
+from relaypot.top_service import top_service
+from relaypot.util import create_endpoint_services
+from utils.config import load_option
+import utils
 
 
 class Options(usage.Options):
@@ -44,7 +38,7 @@ class MyServiceMaker(object):
         # TODO Rewrite config loader
         utils.options = options
         load_option(options['config'])
-        factory = backend.factory.BackendServerFactory()  # TODO: Add here
+        factory = BackendServerFactory()  # TODO: Add here
         factory.tac = self
         # factory.portal = portal.Portal(None) # TODO: Add credentical here
         # factory.portal.registerChecker(None)

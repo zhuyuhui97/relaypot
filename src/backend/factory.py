@@ -1,10 +1,11 @@
-from twisted.internet.protocol import Factory
-from twisted.logger import Logger
-from backend.protocol import BackendServerProtocol
-from typing import Callable, Optional, Tuple
 import utils
 import traceback
 from pydoc import locate
+
+from twisted.internet.protocol import Factory
+from twisted.logger import Logger
+
+from backend.protocol import BackendServerProtocol
 
 
 class BackendServerFactory(Factory):

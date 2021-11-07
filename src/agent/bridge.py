@@ -1,9 +1,9 @@
-from twisted import logger
 from twisted.internet import protocol
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 from twisted.python import failure
 from twisted.logger import Logger
+
 from agent.base import BaseAgent
 
 

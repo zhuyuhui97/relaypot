@@ -1,9 +1,8 @@
-from twisted.application.internet import TCPClient
-from twisted.python import log, failure, components
-from twisted.internet.protocol import ClientFactory, Protocol
-from twisted.logger import Logger
 from typing import Tuple
 import json
+from twisted.python import failure
+from twisted.internet.protocol import ClientFactory, Protocol
+from twisted.logger import Logger
 
 
 class BackendClientProtocol(Protocol):
