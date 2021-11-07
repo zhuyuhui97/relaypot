@@ -7,6 +7,7 @@ from twisted.logger import Logger
 from twisted.internet import reactor
 from twisted.application.internet import TCPClient
 from twisted.internet.endpoints import TCP4ClientEndpoint
+import traceback
 
 from relaypot.util import create_endpoint_services
 from backend.top_service import top_service
@@ -77,6 +78,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         except Exception as e:
             self.twlog.error(
                 'Failed to parse request: buf={buf}, e={e}', buf=buf, e=e)
+            self.twlog.error(traceback.format_exc())
             return None
 
     def init_agent(self):
