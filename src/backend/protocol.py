@@ -46,7 +46,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             if req == None:
                 return
             self.twlog.info('{peer_addr} -> :{fproto_port}  -- {buf}',
-                            peer_addr=self.session_info['src_ip'], fproto_port=self.self.session_info['dest_port'], buf=req)
+                            peer_addr=self.session_info['src_ip'], fproto_port=self.session_info['dest_port'], buf=req)
             self.send_response(self.agent.on_request(req))
 
     def connectionLost(self, reason: failure.Failure):
