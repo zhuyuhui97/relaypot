@@ -4,6 +4,7 @@ from twisted.logger import Logger
 from twisted.internet import reactor
 from twisted.application.internet import TCPClient
 from twisted.internet.endpoints import TCP4ClientEndpoint
+import backend
 
 import relaypot.factory
 from relaypot.util import create_endpoint_services
@@ -11,61 +12,59 @@ from relaypot.backend import BackendClientFactory
 from relaypot.top_service import top_service
 import utils
 
+
 class FrontendProtocol(Protocol):
 
-    log = Logger()
+    twlog = Logger()
 
     def connectionMade(self):
         self.backend_host = utils.global_config['backend']['host']
         self.backend_port = utils.global_config['backend']['port']
-        self.backend_prot = None
+        self.bproto = None
         self.buf_to_send = []
         self.host_addr = self.transport.getHost()
         self.peer_addr = self.transport.getPeer()
-        self.log.info("Got conn {addr} -> :{port}",
-                      addr=self.peer_addr.host, port=self.host_addr.port)
+        self.twlog.info("Got peer connection {addr} -> :{port}",
+                        addr=self.peer_addr.host, port=self.host_addr.port)
         self.setup_backend()
         # set session info here
-        #self.make_upstream_conn()
+        # self.make_upstream_conn()
 
     def connectionLost(self, reason: failure.Failure):
-        self.log.info("Lost conn {addr} -> :{port}",
-                      addr=self.peer_addr.host, port=self.host_addr.port)
+        self.twlog.info("Lost peer connection {addr} -> :{port}",
+                        addr=self.peer_addr.host, port=self.host_addr.port)
         self.close_backend()
 
     def dataReceived(self, data: bytes):
-        self.log.info("Got data {addr} -> :{port} = {data!r}",
-                      addr=self.peer_addr.host, port=self.host_addr.port, data=data)
-        self.to_backend(data)      
-        # reactor
+        self.to_backend(data)
 
     def setup_backend(self):
         f = BackendClientFactory(self)
-        f.host_addr = self.host_addr
-        f.peer_addr = self.peer_addr
-        point = TCP4ClientEndpoint(reactor, self.backend_host, self.backend_port, timeout=20)
+        point = TCP4ClientEndpoint(
+            reactor, self.backend_host, self.backend_port, timeout=20)
         d = point.connect(f)
-        d.addCallback(self.on_backend_connected)
-        d.addErrback(self.on_backend_error)
-        # TODO 
+        d.addCallback(self.on_bproto_connected)
+        d.addErrback(self.on_bproto_error)
 
-    def on_backend_connected(self, backend_trans):
-        self.log.info('123')
-        pass
+    def on_bproto_connected(self, bproto):
+        self.twlog.info('Got bproto {}.'.format(str(bproto)))
+        self.set_bproto(bproto)
 
-    def on_backend_error(self, reason):
-        pass
+    def on_bproto_error(self, reason):
+        self.twlog.info('Failed to connect to backend, closing connection to client: {reason}', reason=reason)
+        self.transport.loseConnection()
 
-    def set_backend_prot(self, b_prot):
-        self.backend_prot = b_prot
+    def set_bproto(self, bproto):
+        self.bproto = bproto
 
     def close_backend(self):
-        if self.backend_prot != None:
-            self.backend_prot.transport.loseConnection()
+        if self.bproto != None:
+            self.twlog.info('Closing connection to backend.')
+            self.bproto.transport.loseConnection()
 
     def to_backend(self, buf):
-        if self.backend_prot == None:
-            self.log.info('buffering buf')
+        if self.bproto == None:
+            self.twlog.info('Buffering bytes when bproto is not ready.')
             self.buf_to_send.append(buf)
         else:
-            self.backend_prot.send_backend(buf)
+            self.bproto.send_backend(buf)
