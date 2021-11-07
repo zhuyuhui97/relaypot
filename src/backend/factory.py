@@ -22,6 +22,6 @@ class BackendServerFactory(Factory):
             klass = locate(cls_name)
             self.twlog.info('Loaded agent class {cls}', cls=cls_name)
         except Exception as e:
-            self.twlog.info('Error loading agent class: {ex}, {trace}', ex=e, trace=traceback.print_exc())
+            self.twlog.info('Error loading agent class: {ex}, {trace}', ex=e, trace=traceback.format_exc())
             klass = locate('agent.dummy.Agent')
         return klass

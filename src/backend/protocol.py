@@ -91,7 +91,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         if buf_seq == None:
             return
         for buf in buf_seq:
-            if buf is str:
+            if isinstance(buf, str):
                 buf = buf.encode()
             if self.sess_log == None:
                 self.twlog.warn(
