@@ -41,7 +41,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             req = self.decode_buf(line)
             if req == None:
                 return
-            self.twlog.info('{peer_addr} -> :{fproto_port}  -- {buf}',
+            self.twlog.info('{peer_addr} -> :{fproto_port} -- {buf}',
                             peer_addr=self.session_info['src_ip'], fproto_port=self.session_info['dest_port'], buf=req)
             self.send_response(self.agent.on_request(req))
 

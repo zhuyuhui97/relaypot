@@ -26,7 +26,7 @@ class Agent(BaseAgent):
         self.fproto = fproto
         self.bproto = None
         self.buf_to_send = []
-        point = TCP4ClientEndpoint(reactor, "localhost", 2324)
+        point = TCP4ClientEndpoint(reactor, "localhost", 2324) # TODO make it NOT hard coded
         d = connectProtocol(point, BridgeProtocol(self))
         d.addCallback(self.on_back_connected)
         d.addErrback(self.on_back_failed)

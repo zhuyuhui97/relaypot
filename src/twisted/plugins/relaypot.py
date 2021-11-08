@@ -5,6 +5,7 @@ from twisted.application.service import IServiceMaker
 from twisted.application import service
 from twisted.internet import reactor
 from twisted.python import usage
+
 from relaypot.factory import HoneypotFactory
 from relaypot.top_service import top_service
 from relaypot.util import create_endpoint_services
