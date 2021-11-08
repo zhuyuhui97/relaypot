@@ -1,7 +1,7 @@
 from twisted.internet import protocol
 from twisted.python import failure
 
-from agent.base import BaseAgent
+from relaypot.agent.base import BaseAgent
 
 
 class Agent(BaseAgent):

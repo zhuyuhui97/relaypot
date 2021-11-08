@@ -1,5 +1,5 @@
-from logger.baselogger import BaseLogger
-from logger.elastic import EsOutput
+from relaypot.logger.baselogger import BaseLogger
+from relaypot.logger.elastic import EsOutput
 
 
 class LogEncoder(BaseLogger):

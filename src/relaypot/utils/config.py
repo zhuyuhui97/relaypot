@@ -1,5 +1,5 @@
 import yaml
-import utils
+from relaypot import utils
 
 def load_option(path):
     with open(path) as conffile:

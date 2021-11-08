@@ -1,5 +1,6 @@
 from twisted.internet.protocol import Factory
-from relaypot.protocol import FrontendProtocol
+
+from relaypot.frontend.protocol import FrontendProtocol
 
 class HoneypotFactory(Factory):
     protocol = FrontendProtocol

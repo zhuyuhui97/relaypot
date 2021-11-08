@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 from elasticsearch import Elasticsearch, NotFoundError
 
-import utils
+from relaypot import utils
 
 
 class EsOutput:

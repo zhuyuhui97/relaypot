@@ -4,10 +4,10 @@ from twisted.logger import Logger
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint
 
-from relaypot.util import create_endpoint_services
-from relaypot.backend import BackendClientFactory
-from relaypot.top_service import top_service
-import utils
+from relaypot.frontend.util import create_endpoint_services
+from relaypot.frontend.backend import BackendClientFactory
+from relaypot.frontend.top_service import top_service
+from relaypot import utils
 
 
 class FrontendProtocol(Protocol):

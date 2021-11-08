@@ -5,9 +5,9 @@ from twisted.protocols.basic import LineOnlyReceiver
 from twisted.python import failure
 from twisted.logger import Logger
 
-from relaypot.util import create_endpoint_services
-from backend.top_service import top_service
-from logger.encutils import LogEncoder
+from relaypot.frontend.util import create_endpoint_services
+from relaypot.backend.top_service import top_service
+from relaypot.logger.encutils import LogEncoder
 
 
 class BackendServerProtocol(LineOnlyReceiver):

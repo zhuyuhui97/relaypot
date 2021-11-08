@@ -6,11 +6,11 @@ from twisted.application import service
 from twisted.internet import reactor
 from twisted.python import usage
 
-from backend.factory import BackendServerFactory
-from relaypot.top_service import top_service
-from relaypot.util import create_endpoint_services
-from utils.config import load_option
-import utils
+from relaypot.backend.factory import BackendServerFactory
+from relaypot.frontend.top_service import top_service
+from relaypot.frontend.util import create_endpoint_services
+from relaypot.utils.config import load_option
+from relaypot import utils
 
 
 class Options(usage.Options):

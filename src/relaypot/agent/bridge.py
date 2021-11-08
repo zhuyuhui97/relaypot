@@ -4,7 +4,7 @@ from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 from twisted.python import failure
 from twisted.logger import Logger
 
-from agent.base import BaseAgent
+from relaypot.agent.base import BaseAgent
 
 
 class BridgeProtocol(protocol.Protocol):
