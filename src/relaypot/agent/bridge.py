@@ -8,9 +8,9 @@ from relaypot.agent.base import BaseAgent
 
 
 class BridgeProtocol(protocol.Protocol):
-    twlog = Logger()
 
-    def __init__(self, agent) -> None:
+    def __init__(self, agent, log) -> None:
+        self._log = log
         self.agent = agent
 
     def dataReceived(self, data: bytes):
@@ -21,13 +21,16 @@ class BridgeProtocol(protocol.Protocol):
 
 
 class Agent(BaseAgent):
-    twlog = Logger()
+    _log_basename = 'Bridge_Agent'
+
     def __init__(self, fproto: protocol.Protocol):
+        self._log = Logger(namespace=self._log_basename)
         self.fproto = fproto
         self.bproto = None
         self.buf_to_send = []
-        point = TCP4ClientEndpoint(reactor, "localhost", 2324) # TODO make it NOT hard coded
-        d = connectProtocol(point, BridgeProtocol(self))
+        # TODO make it NOT hard coded
+        point = TCP4ClientEndpoint(reactor, "localhost", 2324)
+        d = connectProtocol(point, BridgeProtocol(self, self._log))
         d.addCallback(self.on_back_connected)
         d.addErrback(self.on_back_failed)
 
@@ -39,7 +42,7 @@ class Agent(BaseAgent):
             self.buf_to_send.clear()
 
     def on_back_failed(self):
-        self.twlog.error('ASD')
+        self._log.error('ASD')
         self.fproto.transport.loseConnection()
 
     def on_init(self):

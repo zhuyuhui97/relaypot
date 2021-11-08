@@ -13,8 +13,12 @@ from relaypot.logger.encutils import LogEncoder
 class BackendServerProtocol(LineOnlyReceiver):
     # TODO Sometimes log service may unavailable. Trying to connect to the service will throw an exception, which may interrupt the backend service and stop it from cleaning frontent connection.
 
-    twlog = Logger()
+    _log_basename = 'BSrvProto'
     db_logger = LogEncoder
+
+    def __init__(self) -> None:
+        super().__init__()
+        self._log = Logger(namespace=self._log_basename)
 
     def connectionMade(self):
         self.front_addr = self.transport.getPeer()
@@ -22,7 +26,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         self.session_info = None
         self.sess_log = None
         self.agent = None
-        self.twlog.info(
+        self._log.info(
             "Got frontend connection: {host}:{port}", host=self.front_addr.host, port=self.front_addr.port)
 
         # set session info here
@@ -32,7 +36,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         if self.session_info == None:
             self.decode_preamble(line)
             if len(self.resp_to_log) > 0:
-                self.twlog.info(
+                self._log.info(
                     'Commiting {count} buffered logs.', count=len(self.resp_to_log))
                 for buf in self.resp_to_log:
                     self.sess_log.on_response(buf)
@@ -41,8 +45,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             req = self.decode_buf(line)
             if req == None:
                 return
-            self.twlog.info('{peer_addr} -> :{fproto_port} -- {buf}',
-                            peer_addr=self.session_info['src_ip'], fproto_port=self.session_info['dest_port'], buf=req)
+            self._log.info('p -> f -- {buf}', buf=req)
             self.send_response(self.agent.on_request(req))
 
     def connectionLost(self, reason: failure.Failure):
@@ -50,22 +53,25 @@ class BackendServerProtocol(LineOnlyReceiver):
             self.agent.on_front_lost(reason)
         if self.sess_log != None:
             self.sess_log.on_disconnected()
-        self.twlog.info(
-            "Lost frontend connection: {host}:{port}", host=self.front_addr.host, port=self.front_addr.port)
-        
+        self._log.info("Lost frontend connection.")
 
     def decode_preamble(self, buf):
-        self.twlog.info('Got preamble: buf={buf}', buf=buf)
+        self._log.info('Got preamble: buf={buf}', buf=buf)
         try:
             self.session_info = json.loads(buf)
+            self.setup_log_namespace()
             self.init_agent()
             self.sess_log = self.db_logger(**self.session_info)
         except Exception as e:
-            self.twlog.error(
+            self._log.error(
                 'Failed to parse preamble: buf={buf}, e={e}', buf=buf, e=e)
-                
-            self.twlog.error(traceback.format_exc())
+            self._log.error(traceback.format_exc())
             self.transport.loseConnection()
+
+    def setup_log_namespace(self):
+        self._log.namespace = '{basename:<10} p{src_ip}->f{dest_ip}:{dest_port}'.format(
+                basename=self._log_basename, 
+                **self.session_info)
 
     def decode_buf(self, buf):
         try:
@@ -74,9 +80,9 @@ class BackendServerProtocol(LineOnlyReceiver):
             self.sess_log.on_request(msg_buf)
             return msg_buf
         except Exception as e:
-            self.twlog.error(
+            self._log.error(
                 'Failed to parse request: buf={buf}, e={e}', buf=buf, e=e)
-            self.twlog.error(traceback.format_exc())
+            self._log.error(traceback.format_exc())
             return None
 
     def init_agent(self):
@@ -90,11 +96,10 @@ class BackendServerProtocol(LineOnlyReceiver):
             if isinstance(buf, str):
                 buf = buf.encode()
             if self.sess_log == None:
-                self.twlog.warn(
+                self._log.warn(
                     'Buffering logs when log service is not ready.')
                 self.resp_to_log.append(buf)
             else:
                 self.sess_log.on_response(buf)
-            self.twlog.info('{peer_addr} <- :{fproto_port} -- {buf}',
-                            peer_addr=self.session_info['src_ip'], fproto_port=self.session_info['dest_port'], buf=buf)
+            self._log.info('p <- f -- {buf}', buf=buf)
             self.transport.write(buf)

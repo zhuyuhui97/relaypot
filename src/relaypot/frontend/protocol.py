@@ -11,8 +11,11 @@ from relaypot import utils
 
 
 class FrontendProtocol(Protocol):
+    _log_basename = 'FProto'
 
-    twlog = Logger()
+    def __init__(self) -> None:
+        self._log = Logger(namespace=self._log_basename)
+        super().__init__()
 
     def connectionMade(self):
         self.backend_host = utils.global_config['backend']['host']
@@ -21,19 +24,24 @@ class FrontendProtocol(Protocol):
         self.buf_to_send = []
         self.host_addr = self.transport.getHost()
         self.peer_addr = self.transport.getPeer()
-        self.twlog.info("Got peer connection {addr} -> :{port}",
-                        addr=self.peer_addr.host, port=self.host_addr.port)
+        self.setup_log_namespace()
+        self._log.info("Got peer connection.")
         self.setup_backend()
         # set session info here
-        # self.make_upstream_conn()
 
     def connectionLost(self, reason: failure.Failure):
-        self.twlog.info("Lost peer connection {addr} -> :{port}",
-                        addr=self.peer_addr.host, port=self.host_addr.port)
+        self._log.info("Lost peer connection. reason:{reason}", reason=reason)
         self.close_backend()
+        # TODO Protocol call <pair>.transport.loseConnection() in self.connectionLost() may make self.connectionLost() called again.
 
     def dataReceived(self, data: bytes):
         self.to_backend(data)
+
+    def setup_log_namespace(self):
+        self._log.namespace = "{basename:<10} p{peer_addr}->f:{fproto_port}".format(
+            basename=self._log_basename, 
+            peer_addr=self.peer_addr.host, 
+            fproto_port=str(self.host_addr.port))
 
     def setup_backend(self):
         f = BackendClientFactory(self)
@@ -44,11 +52,12 @@ class FrontendProtocol(Protocol):
         d.addErrback(self.on_bproto_error)
 
     def on_bproto_connected(self, bproto):
-        self.twlog.info('Got bproto {}.'.format(str(bproto)))
+        self._log.info('Got bproto {}.'.format(str(bproto)))
         self.set_bproto(bproto)
 
     def on_bproto_error(self, reason):
-        self.twlog.info('Failed to connect to backend, closing connection to client: {reason}', reason=reason)
+        self._log.info(
+            'Failed to connect to backend, closing connection to client: {reason}', reason=reason)
         self.transport.loseConnection()
 
     def set_bproto(self, bproto):
@@ -56,12 +65,12 @@ class FrontendProtocol(Protocol):
 
     def close_backend(self):
         if self.bproto != None:
-            self.twlog.info('Closing connection to backend.')
+            self._log.info('Closing connection to backend.')
             self.bproto.transport.loseConnection()
 
     def to_backend(self, buf):
         if self.bproto == None:
-            self.twlog.info('Buffering bytes when bproto is not ready.')
+            self._log.info('Buffering bytes when bproto is not ready.')
             self.buf_to_send.append(buf)
         else:
             self.bproto.send_backend(buf)

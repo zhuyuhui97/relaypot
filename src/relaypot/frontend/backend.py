@@ -7,10 +7,11 @@ from twisted.logger import Logger
 
 
 class BackendClientProtocol(Protocol):
-    
-    twlog = Logger()
-    
+
+    _log_basename = 'BCliProto'
+
     def __init__(self, factory, fproto) -> None:
+        self._log = Logger()
         self.factory = factory
         self.fproto = fproto
         self.peer_addr = fproto.peer_addr
@@ -19,25 +20,30 @@ class BackendClientProtocol(Protocol):
 
     def connectionMade(self):
         self.back_addr = self.transport.getPeer()
-        self.twlog.info('Made backend connection {bhost}:{port}.', bhost=self.back_addr.host, port=self.back_addr.port)
-        self.transport.write(self.encode_info()) # TODO
+        self.setup_log_namespace()
+        self._log.info('Made backend connection {bhost}:{port}.',
+                       bhost=self.back_addr.host, port=self.back_addr.port)
+        self.transport.write(self.encode_info())  # TODO
         if len(self.fproto.buf_to_send) != 0:
-            self.twlog.info('Sending {} buffered bytes.'.format(str(len(self.fproto.buf_to_send))))
+            self._log.info('Sending {} buffered bytes.'.format(
+                str(len(self.fproto.buf_to_send))))
             for buf in self.fproto.buf_to_send:
                 self.send_backend(buf)
             self.fproto.buf_to_send.clear()
 
     def connectionLost(self, reason: failure.Failure):
-        self.twlog.info('Lost backend connection {bhost}:{port}.', bhost=self.back_addr.host, port=self.back_addr.port)
+        self._log.info('Lost backend connection {bhost}:{port}.',
+                       bhost=self.back_addr.host, port=self.back_addr.port)
         super().connectionLost(reason=reason)
         self.fproto.transport.loseConnection()
+        # TODO Protocol call <pair>.transport.loseConnection() in self.connectionLost() may make self.connectionLost() called again.
 
     def dataReceived(self, data: bytes):
-        self.twlog.info('{peer_addr} <- :{fproto_port} -- {buf}', peer_addr=self.peer_addr.host, fproto_port=str(self.host_addr.port), buf=data)
+        self.fproto._log.info('p <- f -- {buf}', buf=data)
         self.fproto.transport.write(data)
 
     def send_backend(self, buf):
-        self.twlog.info('{peer_addr} -> :{fproto_port} -- {buf}', peer_addr=self.peer_addr.host, fproto_port=str(self.host_addr.port), buf=buf)
+        self.fproto._log.info('p -> f -- {buf}', buf=buf)
         self.transport.write(self.encode_buf(buf))
 
     def encode_info(self):
@@ -58,6 +64,14 @@ class BackendClientProtocol(Protocol):
         }
         return json.dumps(obj, ensure_ascii=False).encode()+b'\r\n'
         # TODO
+
+    def setup_log_namespace(self):
+        self._log.namespace = "{basename:<10} p{peer_addr}->f:{fproto_port}->b{bproto_addr}:{bproto_port}".format(
+            basename=self._log_basename,
+            peer_addr=self.peer_addr.host,
+            fproto_port=str(self.host_addr.port),
+            bproto_addr=self.back_addr.host,
+            bproto_port=self.back_addr.port)
 
 
 class BackendClientFactory(ClientFactory):
