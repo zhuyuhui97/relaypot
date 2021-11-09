@@ -4,8 +4,9 @@
 *.pid
 __pycache__
 .vscode
+.mystage
 config.yaml*
-scripts/config
-scripts/test.sh
 relaypot.sh.conf
 svc
+scripts/configq
+scripts/test.sh
