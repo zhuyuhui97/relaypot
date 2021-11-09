@@ -56,7 +56,7 @@ update(){
             echo "Switching to branch $LOCAL_TARGET"
             git checkout $LOCAL_TARGET
             batch_restart
-        elif [ `cat $REF_LOCAL` != `cat $REF_REMOTE`]; then
+        elif [ `cat $REF_LOCAL` != `cat $REF_REMOTE` ]; then
             # TODO test if service really should restart here
             # Local HEAD is outdated
             echo "Got new version! Merging remote branch $ORIGIN/$REMOTE_TARGET"
