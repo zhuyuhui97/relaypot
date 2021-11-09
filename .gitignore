@@ -8,3 +8,4 @@ config.yaml
 config*.yaml
 scripts/config
 scripts/test.sh
+relaypot.sh.conf
