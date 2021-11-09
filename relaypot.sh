@@ -1,16 +1,4 @@
-# Git repo config
-ORIGIN='origin'
-REMOTE_TARGET='pub'
-LOCAL_TARGET='local_run'
-SVC_FILE='svc'
-BACKEND_PREFIX='backend'
-
-# Runtime config
-RELAYPOT_HOME=`pwd`
-FRMOD='relaypot'
-BKMOD='relaypot-backend'
-RUN_DIR='/var/run/relaypot'
-LOG_DIR='/var/log/relaypot'
+. relaypot.sh.conf
 
 start() {
     if [ ! -z $2 ]; then
