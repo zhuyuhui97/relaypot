@@ -48,7 +48,10 @@ update(){
             # TODO test if service really should restart here
             # Local HEAD is outdated
             echo "Got new version! Merging remote branch $ORIGIN/$REMOTE_TARGET"
-            git merge $ORIGIN/$REMOTE_TARGET
+            git checkout $ORIGIN/$REMOTE_TARGET
+            git branch -D $LOCAL_TARGET
+            git checkout -b $LOCAL_TARGET $ORIGIN/$REMOTE_TARGET
+            # git merge $ORIGIN/$REMOTE_TARGET
             batch_restart
         fi
     else
