@@ -4,8 +4,7 @@
 *.pid
 __pycache__
 .vscode
-config.yaml
-config*.yaml
+config.yaml*
 scripts/config
 scripts/test.sh
 relaypot.sh.conf
