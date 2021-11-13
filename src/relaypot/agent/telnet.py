@@ -88,7 +88,7 @@ class Agent(BaseAgent):
                 responses.append(b'sh: command not found.')
                 continue
             elif b'echo' in cmd:
-                subp = subprocess.run(cmd,stdout=subprocess.PIPE)
+                subp = subprocess.run(cmd,stdout=subprocess.PIPE, shell=True)
                 subp.check_returncode()
                 responses.append(subp.stdout)
             else:
