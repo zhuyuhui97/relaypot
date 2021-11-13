@@ -15,6 +15,7 @@ class Agent(BaseAgent):
     STATUS_REQ_COMMAND = 2
     NON_PRINTABLE = itertools.chain(range(0x00, 0x20), range(0x7f, 0xa0))
     blacklist_name='blacklist.txt'
+    blacklist_base='blacklist'
 
     def __init__(self, fproto:protocol.Protocol, profile_name=None, profile_base='profiles'):
         plist = os.listdir(profile_base)
@@ -29,7 +30,7 @@ class Agent(BaseAgent):
     
     def load_blacklist(self):
         self.blacklist=[]
-        filepath = os.path.join(self.profile_base, self.blacklist_name)
+        filepath = os.path.join(self.blacklist_base, self.blacklist_name)
         with open(filepath) as pfile:
             while True:
                 line = pfile.readline()
