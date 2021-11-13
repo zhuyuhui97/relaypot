@@ -63,7 +63,10 @@ class Agent(BaseAgent):
             self.status = self.STATUS_REQ_COMMAND
             return [self.ps]
         else:
-            return [self.get_resp(buf), '\n', self.ps]
+            resp = self.get_resp(buf)
+            resp.append('\r\n')
+            resp.append(self.ps)
+            return resp
 
     def on_front_lost(self, reason: failure.Failure):
         return None
