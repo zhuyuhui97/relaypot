@@ -26,6 +26,7 @@ class Agent(BaseAgent):
             self.profile_name = profile_name
         self.profile_base = profile_base
         self.load_profile()
+        self.load_blacklist()
         self.status = self.STATUS_REQ_USERNAME
     
     def load_blacklist(self):
