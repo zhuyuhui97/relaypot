@@ -1,6 +1,7 @@
 import os
 import random
 import itertools
+import subprocess
 
 from twisted.internet import protocol
 from twisted.python import failure
@@ -13,6 +14,7 @@ class Agent(BaseAgent):
     STATUS_REQ_PASSWORD = 1
     STATUS_REQ_COMMAND = 2
     NON_PRINTABLE = itertools.chain(range(0x00, 0x20), range(0x7f, 0xa0))
+    blacklist_name='blacklist.txt'
 
     def __init__(self, fproto:protocol.Protocol, profile_name=None, profile_base='profiles'):
         plist = os.listdir(profile_base)
@@ -24,6 +26,17 @@ class Agent(BaseAgent):
         self.profile_base = profile_base
         self.load_profile()
         self.status = self.STATUS_REQ_USERNAME
+    
+    def load_blacklist(self):
+        self.blacklist=[]
+        filepath = os.path.join(self.profile_base, self.blacklist_name)
+        with open(filepath) as pfile:
+            while True:
+                line = pfile.readline()
+                if line == '':
+                    break
+                else:
+                    self.blacklist.append(line.encode())
 
     def load_profile(self):
         filepath = os.path.join(self.profile_base, self.profile_name)
@@ -58,4 +71,21 @@ class Agent(BaseAgent):
 
     def get_resp(self, buf):
         # TODO How to display commands when there are non-unicode bytes?
-        return 'sh: command not found.'
+        responses = []
+        cmds = buf.split(b';')
+        for cmd in cmds:
+            black = False
+            for black_item in self.blacklist:
+                if black_item in cmd:
+                    black=True
+                    break
+            if black:
+                responses.append('sh: command not found.')
+                continue
+            elif b'echo' in cmd:
+                subp = subprocess.run(cmd,stdout=subprocess.PIPE)
+                subp.check_returncode()
+                responses.append(subp.stdout)
+            else:
+                responses.append('sh: command not found.')
+        return responses
