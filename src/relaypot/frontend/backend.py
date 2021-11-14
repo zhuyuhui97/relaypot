@@ -32,8 +32,10 @@ class BackendClientProtocol(Protocol):
             self.fproto.buf_to_send.clear()
 
     def connectionLost(self, reason: failure.Failure):
-        self._log.info('Lost backend connection {bhost}:{port}.',
-                       bhost=self.back_addr.host, port=self.back_addr.port)
+        self._log.info('Lost backend connection {bhost}:{port}. reason:{reason}',
+                       bhost=self.back_addr.host, 
+                       port=self.back_addr.port, 
+                       reason=reason)
         super().connectionLost(reason=reason)
         self.fproto.transport.loseConnection()
         # TODO Protocol call <pair>.transport.loseConnection() in self.connectionLost() may make self.connectionLost() called again.
