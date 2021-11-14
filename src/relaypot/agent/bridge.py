@@ -74,10 +74,10 @@ class Agent(BaseAgent):
         # for idx in range(len(buf)):
         #     if idx
         if b'\xff\xfc\x18' in buf:
-            self.fproto.transport.write(b'\xff\xfe\x18')
-        if self.STATUS==self.STATUS_NO_AUTH:
+            self.to_frontend(b'\xff\xfe\x18')
+        if self.STATUS==self.STATUS_REQ_USERNAME:
             buf=b'zyh\r\n'
-        elif self.STATUS==self.STATUS_REQ_USERNAME:
+        elif self.STATUS==self.STATUS_REQ_PASSWORD:
             buf=b'123\r\n'
         # segs = buf.split(b'\xff')
         # new_segs=[]
