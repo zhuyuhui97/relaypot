@@ -14,7 +14,7 @@ class BridgeProtocol(protocol.Protocol):
         self.agent = agent
 
     def dataReceived(self, data: bytes):
-        self.agent.fproto.send_response([data])
+        self.agent.to_frontend(data)
 
     def connectionLost(self, reason: failure.Failure):
         self.agent.on_agent_lost()
@@ -22,8 +22,15 @@ class BridgeProtocol(protocol.Protocol):
 
 class Agent(BaseAgent):
     _log_basename = 'Bridge_Agent'
+    REQ_USERNAME = b'login:'
+    REQ_PASSWORD = b'Password:'
+    STATUS_NO_AUTH = 0
+    STATUS_REQ_USERNAME = 1
+    STATUS_REQ_PASSWORD = 2
+    STATUS_AUTH_DONE = 3
 
     def __init__(self, fproto: protocol.Protocol):
+        self.STATUS=self.STATUS_NO_AUTH
         self._log = Logger(namespace=self._log_basename)
         self.fproto = fproto
         self.bproto = None
@@ -38,7 +45,7 @@ class Agent(BaseAgent):
         self.bproto = proto
         if len(self.buf_to_send) > 0:
             for item in self.buf_to_send:
-                self.bproto.transport.write(item)
+                self.to_backend(item)
             self.buf_to_send.clear()
 
     def on_back_failed(self):
@@ -53,7 +60,7 @@ class Agent(BaseAgent):
             print('buffering buf')
             self.buf_to_send.append(buf)
         else:
-            self.bproto.transport.write(buf)
+            self.to_backend(buf)
 
     def on_front_lost(self, reason: failure.Failure):
         if self.bproto != None:
@@ -61,3 +68,31 @@ class Agent(BaseAgent):
 
     def on_agent_lost(self):
         self.fproto.transport.loseConnection()
+
+    def to_backend(self, buf:bytes):
+        # Process \xff
+        # for idx in range(len(buf)):
+        #     if idx
+        if self.STATUS==self.STATUS_NO_AUTH:
+            buf='zyh\r\n'
+        elif self.STATUS==self.STATUS_REQ_USERNAME:
+            buf='123\r\n'
+        # segs = buf.split(b'\xff')
+        # new_segs=[]
+        # for idx in range(0, len(segs)):
+        #     if segs[idx][0] == b'\xff':
+        #         new_segs[-1].append(b'\xff')
+        #         new_segs[-1].append(segs[idx])
+        #     else:
+        #         new_segs.append(segs[idx])
+        
+        self.bproto.transport.write(buf)
+
+    def to_frontend(self, buf):
+        if self.STATUS==self.STATUS_NO_AUTH and self.REQ_USERNAME in buf:
+            self.STATUS=self.STATUS_REQ_USERNAME
+        elif self.STATUS==self.STATUS_REQ_USERNAME and self.REQ_PASSWORD in buf:
+            self.STATUS=self.STATUS_REQ_PASSWORD
+        elif self.STATUS==self.STATUS_REQ_PASSWORD and b'Welcome' in buf:
+            self.STATUS=self.STATUS_AUTH_DONE
+        self.fproto.send_response([buf])
