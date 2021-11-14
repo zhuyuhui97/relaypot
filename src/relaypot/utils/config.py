@@ -19,5 +19,7 @@ def load_git_rev():
     cwd = get_home_path()
     res = run(['git','rev-parse','--short','HEAD'], stdout=PIPE, cwd=cwd)
     res.check_returncode()
+    if res.returncode != 0:
+        return 
     utils.git_rev = res.stdout.decode().strip()
     return utils.git_rev
