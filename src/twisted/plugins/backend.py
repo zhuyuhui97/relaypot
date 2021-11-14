@@ -9,7 +9,7 @@ from twisted.python import usage
 from relaypot.backend.factory import BackendServerFactory
 from relaypot.frontend.top_service import top_service
 from relaypot.frontend.util import create_endpoint_services
-from relaypot.utils.config import load_option
+from relaypot.utils.config import load_option, load_git_rev
 from relaypot import utils
 
 
@@ -32,13 +32,14 @@ class MyServiceMaker(object):
         self.topService = top_service
         application = service.Application("relaypot-backend")
         self.topService.setServiceParent(application)
+        # TODO Rewrite config loader
+        utils.options = options
+        load_option(options['config'])
+        load_git_rev()
         self.initProtocol(options)
         return self.topService
 
     def initProtocol(self, options):
-        # TODO Rewrite config loader
-        utils.options = options
-        load_option(options['config'])
         factory = BackendServerFactory()  # TODO: Add here
         factory.tac = self
         # factory.portal = portal.Portal(None) # TODO: Add credentical here

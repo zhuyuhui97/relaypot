@@ -1,35 +1,38 @@
 from relaypot.logger.baselogger import BaseLogger
 from relaypot.logger.elastic import EsOutput
+from relaypot import utils
 
 
 class LogEncoder(BaseLogger):
-    def __init__(self, src_ip: str, src_port: int, dest_ip: str, dest_port: int, logger: BaseLogger = EsOutput) -> None:
+    def __init__(self, sid: str, src_ip: str, src_port: int, dest_ip: str, dest_port: int, logger: BaseLogger = EsOutput) -> None:
         self.logger = logger()
         self.src_ip = src_ip
         self.src_port = src_port
         self.dest_ip = dest_ip
         self.dest_port = dest_port
+        self.sid = sid
+        self.git_rev = utils.git_rev
         self.on_connected()
 
     def on_connected(self):
         obj = self.fill_base_info()
-        obj['eventid'] = 'relaypot.session.connected',
+        obj['eventid'] = 'relaypot.session.connected'
         self.logger.write(obj)
 
     def on_disconnected(self):
         obj = self.fill_base_info()
-        obj['eventid'] = 'relaypot.session.disconnected',
+        obj['eventid'] = 'relaypot.session.disconnected'
         self.logger.write(obj)
 
     def on_request(self, buf: bytes):
         obj = self.fill_base_info()
-        obj['eventid'] = 'relaypot.session.request',
+        obj['eventid'] = 'relaypot.session.request'
         obj['buf'] = repr(buf)
         self.logger.write(obj)
 
     def on_response(self, buf: bytes):
         obj = self.fill_base_info()
-        obj['eventid'] = 'relaypot.session.response',
+        obj['eventid'] = 'relaypot.session.response'
         obj['buf'] = repr(buf)
         self.logger.write(obj)
 
@@ -39,6 +42,8 @@ class LogEncoder(BaseLogger):
             'src_port': self.src_port,
             'dst_ip': self.dest_ip,
             'dst_port': self.dest_port,
-            'timestamp': self.get_timestamp()
+            'timestamp': self.get_timestamp(),
+            'sid': self.sid,
+            'back_rev': self.git_rev
         }
         return obj

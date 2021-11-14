@@ -1,5 +1,7 @@
 import json
 import traceback
+import os
+import base64
 
 from twisted.protocols.basic import LineOnlyReceiver
 from twisted.python import failure
@@ -26,9 +28,9 @@ class BackendServerProtocol(LineOnlyReceiver):
         self.session_info = None
         self.sess_log = None
         self.agent = None
+        self.sid = base64.b64encode(os.urandom(32))[:8].decode()
         self._log.info(
-            "Got frontend connection: {host}:{port}", host=self.front_addr.host, port=self.front_addr.port)
-
+            "Got frontend connection {id}: {host}:{port}", id=self.sid, host=self.front_addr.host, port=self.front_addr.port)
         # set session info here
         # self.make_upstream_conn()
 
@@ -61,7 +63,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             self.session_info = json.loads(buf)
             self.setup_log_namespace()
             self.init_agent()
-            self.sess_log = self.db_logger(**self.session_info)
+            self.sess_log = self.db_logger(sid=self.sid, **self.session_info)
         except Exception as e:
             self._log.error(
                 'Failed to parse preamble: buf={buf}, e={e}', buf=buf, e=e)
@@ -69,7 +71,8 @@ class BackendServerProtocol(LineOnlyReceiver):
             self.transport.loseConnection()
 
     def setup_log_namespace(self):
-        self._log.namespace = '{basename:<10} p{src_ip}->f{dest_ip}:{dest_port}'.format(
+        self._log.namespace = '{basename:<10} {sid} p{src_ip}->f{dest_ip}:{dest_port}'.format(
+                sid=self.sid,
                 basename=self._log_basename, 
                 **self.session_info)
 
