@@ -55,7 +55,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             self.agent.on_front_lost(reason)
         if self.sess_log != None:
             self.sess_log.on_disconnected()
-        self._log.info("Lost frontend connection.")
+        self._log.info("Lost frontend connection. reason:{reason}", reason=reason)
 
     def decode_preamble(self, buf):
         self._log.info('Got preamble: buf={buf}', buf=buf)
