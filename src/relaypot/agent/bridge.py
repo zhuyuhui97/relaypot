@@ -73,6 +73,8 @@ class Agent(BaseAgent):
         # Process \xff
         # for idx in range(len(buf)):
         #     if idx
+        if b'\xff\xfc\x18' in buf:
+            self.fproto.transport.write(b'\xff\xfe\x18')
         if self.STATUS==self.STATUS_NO_AUTH:
             buf=b'zyh\r\n'
         elif self.STATUS==self.STATUS_REQ_USERNAME:
