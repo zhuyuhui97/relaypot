@@ -28,7 +28,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         self.session_info = None
         self.sess_log = None
         self.agent = None
-        self.sid = str(base64.b64encode(os.urandom(32))[:8])
+        self.sid = base64.b64encode(os.urandom(32))[:8].decode()
         self._log.info(
             "Got frontend connection {id}: {host}:{port}", id=self.sid, host=self.front_addr.host, port=self.front_addr.port)
         # set session info here
