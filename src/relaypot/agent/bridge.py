@@ -74,12 +74,12 @@ class Agent(BaseAgent):
         # for idx in range(len(buf)):
         #     if idx
         if self.STATUS==self.STATUS_REQ_USERNAME:
-            if buf.endswith(b'\r\n'):
+            if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
                 buf=b'zyh\r\n'
             else:
                 return
         elif self.STATUS==self.STATUS_REQ_PASSWORD:
-            if buf.endswith(b'\r\n'):
+            if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
                 buf=b'123123\r\n'
             else:
                 return
