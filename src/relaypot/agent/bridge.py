@@ -102,6 +102,6 @@ class Agent(BaseAgent):
         elif self.STATUS==self.STATUS_REQ_PASSWORD:
             self.STATUS=self.STATUS_AUTH_DONE
         else:
-            if buf.endswith(b'#'):
+            if buf.endswith(b'# '):
                 buf.replace(b'#', b'>')
         self.fproto.send_response([buf])
