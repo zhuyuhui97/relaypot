@@ -75,7 +75,7 @@ class Agent(BaseAgent):
         #     if idx
         if self.STATUS==self.STATUS_REQ_USERNAME:
             if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
-                buf=b'zyh\r\n'
+                buf=b'admin\r\n'
             else:
                 return
         elif self.STATUS==self.STATUS_REQ_PASSWORD:
