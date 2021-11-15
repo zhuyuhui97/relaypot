@@ -101,4 +101,6 @@ class Agent(BaseAgent):
             self.STATUS=self.STATUS_REQ_PASSWORD
         elif self.STATUS==self.STATUS_REQ_PASSWORD:
             self.STATUS=self.STATUS_AUTH_DONE
+        else:
+            buf.replace(b'admin@R6300V2-14EF:/tmp/home/root#', '>' )
         self.fproto.send_response([buf])
