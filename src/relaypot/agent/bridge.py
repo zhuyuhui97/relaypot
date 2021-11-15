@@ -73,12 +73,12 @@ class Agent(BaseAgent):
         # Process \xff
         # for idx in range(len(buf)):
         #     if idx
-        if b'\xff\xfc\x18' in buf:
-            self.to_frontend(b'\xff\xfe\x18')
-        if self.STATUS==self.STATUS_REQ_USERNAME:
-            buf=b'zyh\r\n'
-        elif self.STATUS==self.STATUS_REQ_PASSWORD:
-            buf=b'123\r\n'
+        # if b'\xff\xfc\x18' in buf:
+        #     self.to_frontend(b'\xff\xfe\x18')
+        # if self.STATUS==self.STATUS_REQ_USERNAME:
+        #     buf=b'zyh\r\n'
+        # elif self.STATUS==self.STATUS_REQ_PASSWORD:
+        #     buf=b'123\r\n'
         # segs = buf.split(b'\xff')
         # new_segs=[]
         # for idx in range(0, len(segs)):
