@@ -1,7 +1,5 @@
 import json
 import traceback
-import os
-import base64
 
 from twisted.protocols.basic import LineOnlyReceiver
 from twisted.python import failure
@@ -10,6 +8,7 @@ from twisted.logger import Logger
 from relaypot.frontend.util import create_endpoint_services
 from relaypot.backend.top_service import top_service
 from relaypot.logger.encutils import LogEncoder
+from relaypot.utils.config import gen_sessid
 
 
 class BackendServerProtocol(LineOnlyReceiver):
@@ -28,7 +27,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         self.session_info = None
         self.sess_log = None
         self.agent = None
-        self.sid = base64.b64encode(os.urandom(32))[:8].decode()
+        self.sid = gen_sessid()
         self._log.info(
             "Got frontend connection {id}: {host}:{port}", id=self.sid, host=self.front_addr.host, port=self.front_addr.port)
         # set session info here
