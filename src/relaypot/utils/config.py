@@ -1,6 +1,7 @@
 import yaml
 import os
 import base64
+import random
 from subprocess import run, PIPE
 
 from relaypot import utils
@@ -26,4 +27,6 @@ def load_git_rev():
     return utils.git_rev
 
 def gen_sessid():
-    return base64.b64encode(os.urandom(32))[:8].decode()
+    # return base64.b64encode(os.urandom(32))[:8].decode()
+    seed = '0123456789abcdef'
+    return ''.join(random.choice(seed) for i in range(16))
