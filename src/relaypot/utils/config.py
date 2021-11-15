@@ -1,5 +1,6 @@
 import yaml
 import os
+import base64
 from subprocess import run, PIPE
 
 from relaypot import utils
@@ -23,3 +24,6 @@ def load_git_rev():
         return 
     utils.git_rev = res.stdout.decode().strip()
     return utils.git_rev
+
+def gen_sessid():
+    return base64.b64encode(os.urandom(32))[:8].decode()
