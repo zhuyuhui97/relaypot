@@ -99,6 +99,6 @@ class Agent(BaseAgent):
             self.STATUS=self.STATUS_REQ_USERNAME
         elif self.STATUS==self.STATUS_REQ_USERNAME and self.REQ_PASSWORD in buf:
             self.STATUS=self.STATUS_REQ_PASSWORD
-        elif self.STATUS==self.STATUS_REQ_PASSWORD and b'Welcome' in buf:
+        elif self.STATUS==self.STATUS_REQ_PASSWORD:
             self.STATUS=self.STATUS_AUTH_DONE
         self.fproto.send_response([buf])
