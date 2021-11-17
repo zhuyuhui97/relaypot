@@ -22,6 +22,7 @@ watch() {
 
 restart(){
     ./scripts/utils.sh stop $* 
+    sleep 2
     ./scripts/utils.sh start $*
 }
 
