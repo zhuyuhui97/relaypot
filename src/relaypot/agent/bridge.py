@@ -70,23 +70,17 @@ class Agent(BaseAgent):
         self.fproto.transport.loseConnection()
 
     def to_backend(self, buf:bytes):
-        # Process \xff
-        # for idx in range(len(buf)):
-        #     if idx
-        # if b'\xff\xfc\x18' in buf:
-        #     self.to_frontend(b'\xff\xfe\x18')
-        # if self.STATUS==self.STATUS_REQ_USERNAME:
-        #     buf=b'zyh\r\n'
-        # elif self.STATUS==self.STATUS_REQ_PASSWORD:
-        #     buf=b'123\r\n'
-        # segs = buf.split(b'\xff')
-        # new_segs=[]
-        # for idx in range(0, len(segs)):
-        #     if segs[idx][0] == b'\xff':
-        #         new_segs[-1].append(b'\xff')
-        #         new_segs[-1].append(segs[idx])
-        #     else:
-        #         new_segs.append(segs[idx])
+        # TODO Process \xff
+        if self.STATUS==self.STATUS_REQ_USERNAME:
+            if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
+                buf=b'admin\r\n'
+            else:
+                return
+        elif self.STATUS==self.STATUS_REQ_PASSWORD:
+            if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
+                buf=b'123123\r\n'
+            else:
+                return
         
         self.bproto.transport.write(buf)
 
@@ -95,6 +89,9 @@ class Agent(BaseAgent):
             self.STATUS=self.STATUS_REQ_USERNAME
         elif self.STATUS==self.STATUS_REQ_USERNAME and self.REQ_PASSWORD in buf:
             self.STATUS=self.STATUS_REQ_PASSWORD
-        elif self.STATUS==self.STATUS_REQ_PASSWORD and b'Welcome' in buf:
+        elif self.STATUS==self.STATUS_REQ_PASSWORD:
             self.STATUS=self.STATUS_AUTH_DONE
+        else:
+            if buf.endswith(b'# '):
+                buf.replace(b'#', b'>')
         self.fproto.send_response([buf])
