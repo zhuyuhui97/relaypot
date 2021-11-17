@@ -7,15 +7,16 @@ from twisted.logger import Logger
 
 from relaypot.frontend.util import create_endpoint_services
 from relaypot.backend.top_service import top_service
-from relaypot.logger.encutils import LogEncoder
-from relaypot.utils.config import gen_sessid
+from relaypot.output import BaseOutput
+from relaypot.utils.vars import gen_sessid
+from relaypot import utils
 
 
 class BackendServerProtocol(LineOnlyReceiver):
     # TODO Sometimes log service may unavailable. Trying to connect to the service will throw an exception, which may interrupt the backend service and stop it from cleaning frontent connection.
 
     _log_basename = 'BSrvProto'
-    db_logger = LogEncoder
+    db_logger = BaseOutput
 
     def __init__(self) -> None:
         super().__init__()
@@ -88,7 +89,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             return None
 
     def init_agent(self):
-        self.agent = self.factory.agent_cls(self)
+        self.agent = utils.cls_agent(self)
         self.send_response(self.agent.on_init())
 
     def send_response(self, buf_seq):
