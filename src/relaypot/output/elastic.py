@@ -5,7 +5,7 @@ from elasticsearch import Elasticsearch, NotFoundError
 from relaypot import utils
 
 
-class EsOutput:
+class Writer:
     index: str = 'relaypot_test'
     pipeline: str = 'geoip'
     es: Any
