@@ -9,7 +9,7 @@ from twisted.python import usage
 from relaypot.frontend.factory import HoneypotFactory
 from relaypot.frontend.top_service import top_service
 from relaypot.frontend.util import create_endpoint_services
-from relaypot.utils.config import load_option, load_git_rev
+from relaypot.utils.config import init_common
 from relaypot import utils
 
 
@@ -34,8 +34,7 @@ class MyServiceMaker(object):
         application = service.Application("relaypot")
         self.topService.setServiceParent(application)
         utils.options = options
-        load_option(options['config'])
-        load_git_rev()
+        init_common(options['config'])
         self.initProtocol(options)
         return self.topService
 

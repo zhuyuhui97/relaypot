@@ -1,29 +1,17 @@
 import yaml
-import os
-import base64
-from subprocess import run, PIPE
 
 from relaypot import utils
+from relaypot.utils.mods import get_agent_class, get_writer_class
+from relaypot.utils.vars import load_git_rev
 
 
-def load_option(path):
-    with open(path) as conffile:
+def init_common(conf_path):
+    load_config_file(conf_path)
+    load_git_rev()
+    utils.cls_agent = get_agent_class()
+    utils.cls_writer = get_writer_class()
+
+
+def load_config_file(conf_path):
+    with open(conf_path) as conffile:
         utils.global_config = yaml.load(conffile)
-
-def get_home_path():
-    filepath = os.path.abspath(__file__)
-    root_path = os.path.join(filepath, '../../')
-    root_path = os.path.normpath(root_path)
-    return os.path.join(root_path)
-
-def load_git_rev():
-    cwd = get_home_path()
-    res = run(['git','rev-parse','--short','HEAD'], stdout=PIPE, cwd=cwd)
-    res.check_returncode()
-    if res.returncode != 0:
-        return 
-    utils.git_rev = res.stdout.decode().strip()
-    return utils.git_rev
-
-def gen_sessid():
-    return base64.b64encode(os.urandom(32))[:8].decode()
