@@ -21,7 +21,7 @@ def get_agent_class():
 def get_writer_class():
     klass = None
     try:
-        agent_name = utils.global_config['backend']['agent']
+        agent_name = utils.global_config['backend']['writer']
         cls_name = 'relaypot.output.' + agent_name + '.Writer'
         klass = locate(cls_name)
         if klass == None:

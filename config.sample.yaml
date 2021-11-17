@@ -1,6 +1,7 @@
 backend:
   host: backend.host
   port: 6667
+
   es:
     host: es.host
     port: 9200
@@ -10,4 +11,5 @@ backend:
     auth_id: id
     auth_apikey: key
   agent: dummy
+  writer: elastic
 
