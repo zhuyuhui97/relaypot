@@ -1,3 +1,5 @@
+import hashlib
+
 from twisted.internet import protocol
 from twisted.internet import reactor
 from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
@@ -35,8 +37,10 @@ class Agent(BaseAgent):
         self.fproto = fproto
         self.bproto = None
         self.buf_to_send = []
+        self._req_frag = None
+        self._resp_frag = None
         # TODO make it NOT hard coded
-        point = TCP4ClientEndpoint(reactor, "192.168.50.1", 23)
+        point = TCP4ClientEndpoint(reactor, "127.0.0.1", 2324)
         d = connectProtocol(point, BridgeProtocol(self, self._log))
         d.addCallback(self.on_back_connected)
         d.addErrback(self.on_back_failed)
@@ -53,15 +57,16 @@ class Agent(BaseAgent):
         self.fproto.transport.loseConnection()
 
     def on_request(self, buf):
+        self.truncate_response(buf)
         # TODO Process \xff
         if self.STATUS == self.STATUS_REQ_USERNAME:
             if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
-                buf = b'admin\r\n'
+                buf = b'root\r\n'
             else:
                 return
         elif self.STATUS == self.STATUS_REQ_PASSWORD:
             if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
-                buf = b'123123\r\n'
+                buf = b'admin\r\n'
             else:
                 return
         if self.bproto == None:
@@ -71,6 +76,7 @@ class Agent(BaseAgent):
             self._to_backend(buf)
 
     def on_response(self, buf: bytes):
+        self.truncate_request(buf)
         self.set_status(buf)
         self._to_frontend([buf])
 
@@ -88,3 +94,24 @@ class Agent(BaseAgent):
             self.STATUS = self.STATUS_REQ_PASSWORD
         elif self.STATUS == self.STATUS_REQ_PASSWORD:
             self.STATUS = self.STATUS_AUTH_DONE
+
+    def truncate_request(self, new_resp_buf):
+        if self._req_frag != None:
+            self._log.info('TRUNK '+ repr(self._req_frag))
+            self._log.info(hashlib.md5(self._req_frag).hexdigest())
+            self._req_frag = None
+        if self._resp_frag == None:
+            self._resp_frag = new_resp_buf
+        else:
+            self._resp_frag = self._resp_frag + new_resp_buf
+
+
+    def truncate_response(self, new_req_buf):
+        if self._resp_frag != None:
+            self._log.info('TRUNK '+ repr(self._resp_frag))
+            self._log.info(hashlib.md5(self._resp_frag).hexdigest())
+            self._resp_frag = None
+        if self._req_frag == None:
+            self._req_frag = new_req_buf
+        else:
+            self._req_frag = self._req_frag + new_req_buf
