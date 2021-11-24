@@ -19,6 +19,7 @@ class Agent(BaseAgent):
     blacklist_base = 'blacklist'
 
     def __init__(self, fproto: protocol.Protocol, profile_name=None, profile_base='profiles'):
+        self.fproto = fproto
         plist = os.listdir(profile_base)
         if profile_name == None:
             rnd = random.randrange(0, len(plist))
@@ -58,7 +59,7 @@ class Agent(BaseAgent):
 
     def on_init(self):
         self.status = self.STATUS_REQ_USERNAME
-        return [b'\xff\xfd\x01\xff\xfd\x1f\xff\xfb\x01\xff\xfb\x03R6300V2-14EF login: ']
+        self._to_frontend([b'\xff\xfd\x01\xff\xfd\x1f\xff\xfb\x01\xff\xfb\x03R6300V2-14EF login: '])
 
     def on_request(self, buf: bytes):
         END_WITH_NL = buf.endswith(b'\r\n') or buf.endswith(b'\r\x00')
@@ -86,13 +87,7 @@ class Agent(BaseAgent):
                 self.line_buffer = b''
                 resp.append(b'\r\n')
                 resp.append(self.ps)
-        return resp
-
-    def on_front_lost(self, reason: failure.Failure):
-        return None
-
-    def on_agent_lost(self):
-        return None
+        self.on_response(resp)
 
     def get_resp(self, buf):
         # TODO How to display commands when there are non-unicode bytes?

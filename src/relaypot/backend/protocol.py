@@ -31,8 +31,6 @@ class BackendServerProtocol(LineOnlyReceiver):
         self.sid = gen_sessid()
         self._log.info(
             "Got frontend connection {id}: {host}:{port}", id=self.sid, host=self.front_addr.host, port=self.front_addr.port)
-        # set session info here
-        # self.make_upstream_conn()
 
     def lineReceived(self, line):
         if self.session_info == None:
@@ -48,7 +46,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             if req == None:
                 return
             self._log.info('p -> f -- {buf}', buf=req)
-            self.send_response(self.agent.on_request(req))
+            self.agent.on_request(req)
 
     def connectionLost(self, reason: failure.Failure):
         if self.agent != None:
@@ -90,7 +88,7 @@ class BackendServerProtocol(LineOnlyReceiver):
 
     def init_agent(self):
         self.agent = utils.cls_agent(self)
-        self.send_response(self.agent.on_init())
+        self.agent.on_init()
 
     def send_response(self, buf_seq):
         if buf_seq == None:
