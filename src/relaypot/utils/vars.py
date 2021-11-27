@@ -8,7 +8,8 @@ def get_home_path():
     filepath = os.path.abspath(__file__)
     root_path = os.path.join(filepath, '../../')
     root_path = os.path.normpath(root_path)
-    return os.path.join(root_path)
+    utils.home_path = os.path.join(root_path)
+    return utils.home_path
 
 def load_git_rev():
     cwd = get_home_path()
