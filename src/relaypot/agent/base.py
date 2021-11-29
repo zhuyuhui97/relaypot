@@ -3,6 +3,11 @@ from twisted.python import failure
 
 
 class BaseAgent():
+    
+    @staticmethod
+    def pre_init():
+        return
+
     def __init__(self, fproto: protocol.Protocol):
         self.fproto = fproto
 

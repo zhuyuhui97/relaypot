@@ -1,7 +1,8 @@
 import json
 
+from relaypot.output import null
 
-class Writer():
+class Writer(null.Writer):
     def __init__(self) -> None:
         return
 

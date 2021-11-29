@@ -16,6 +16,7 @@ def get_agent_class():
         # self._log.info('Error loading agent class: {ex}, {trace}', ex=e, trace=traceback.format_exc())
         print('Error loading agent class: {ex}, {trace}'.format(ex=e, trace=traceback.format_exc()))
         klass = locate('relaypot.agent.dummy.Agent')
+    klass.pre_init()
     return klass
 
 def get_writer_class():
@@ -32,4 +33,5 @@ def get_writer_class():
         # _log.info('Error loading writer class: {ex}, {trace}', ex=e, trace=traceback.format_exc())
         print('Error loading writer class: {ex}, {trace}'.format(ex=e, trace=traceback.format_exc()))
         klass = locate('relaypot.output.null.Writer')
+    klass.pre_init()
     return klass

@@ -15,6 +15,12 @@ class Agent(BaseAgent):
     STATUS_REQ_PASSWORD = 2
     STATUS_AUTH_DONE = 3
 
+    @staticmethod
+    def pre_init():
+        if Agent.req_dict == None or Agent.resp_dict == None:
+            Agent.load_profile()
+
+    @staticmethod
     def load_profile():
         req_path = os.path.join(utils.home_path, 'req.json')
         resp_path = os.path.join(utils.home_path, 'resp.json')
@@ -26,21 +32,23 @@ class Agent(BaseAgent):
     
     def __init__(self, fproto:protocol.Protocol):
         self.fproto = fproto
-        if Agent.req_dict == None or Agent.resp_dict == None:
-            Agent.load_profile()
         return None
 
     def on_init(self):
-        self.on_response([self.get_resp('WAIT')])
+        self.on_response(self.get_resp('WAIT'))
 
     def on_request(self, buf):
         bufhash = hashlib.md5(buf).hexdigest()
-        self.on_response([self.get_resp(bufhash)])
+        self.on_response(self.get_resp(bufhash))
         
     def get_resp(self, bufhash):
         if bufhash not in Agent.req_dict:
             bufhash = random.choice(list(Agent.req_dict.keys()))
         responses = Agent.req_dict[bufhash]['resp']
         resp_hash = random.choice(responses)
-        resp = eval(Agent.resp_dict[resp_hash]['buf'])
-        return resp
+        if resp_hash == 'WAIT':
+            return None
+        resp_list = []
+        for item in Agent.resp_dict[resp_hash]:
+            resp_list.append(eval(item))
+        return resp_list

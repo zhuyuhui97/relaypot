@@ -3,9 +3,10 @@ from typing import Any, Dict
 from elasticsearch import Elasticsearch, NotFoundError
 
 from relaypot import utils
+from relaypot.output import null
 
 
-class Writer:
+class Writer(null.Writer):
     index: str = 'relaypot_test'
     pipeline: str = 'geoip'
     es: Any
