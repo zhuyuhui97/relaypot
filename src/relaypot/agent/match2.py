@@ -22,8 +22,10 @@ class Agent(BaseAgent):
 
     @staticmethod
     def load_profile():
-        req_path = os.path.join(utils.home_path, 'req.json')
-        resp_path = os.path.join(utils.home_path, 'resp.json')
+        config = utils.global_config['backend']['match2']
+        basedir = config['base']
+        req_path = os.path.join(basedir, 'req.json')
+        resp_path = os.path.join(basedir, 'resp.json')
         with open(req_path, 'r') as req_file:
             Agent.req_dict = json.load(req_file)
         with open(resp_path, 'r') as resp_file:

@@ -5,7 +5,7 @@ from relaypot import utils
 
 class BaseOutput():
     def __init__(self, sid: str, src_ip: str, src_port: int, dest_ip: str, dest_port: int) -> None:
-        self.logger = utils.cls_writer()
+        self.logger = utils.cls_writer(sid)
         self.src_ip = src_ip
         self.src_port = src_port
         self.dest_ip = dest_ip

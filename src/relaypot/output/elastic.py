@@ -11,15 +11,16 @@ class Writer(null.Writer):
     pipeline: str = 'geoip'
     es: Any
 
-    def __init__(self):
-        if utils.global_config==None:
-            #TODO raise another exception
+    @staticmethod
+    def pre_init():
+        if utils.global_config == None:
+            # TODO raise another exception
             raise Exception
 
         config = utils.global_config['backend']['es']
         host = config['host']
         port = str(config['port'])
-        self.index = config['index']
+        Writer.index = config['index']
 
         es_options: Dict[str, Any] = {
             # 'api_key' : ('Cf1wb3wB5zhXXict03zUA', 'G1NJYETDRayiIUIudt1ZR'),
@@ -33,11 +34,15 @@ class Writer(null.Writer):
             es_options['api_key'] = (config['auth_id'], config['auth_apikey'])
         elif 'auth_user' in config_keys and 'auth_pw' in config_keys:
             es_options['http_auth'] = (config['auth_user'], config['auth_pw'])
-        else:    #TODO raise another exception
+        else:  # TODO raise another exception
             raise Exception
 
-        self.es = Elasticsearch(f'{host}:{port}', **es_options)
-    
+        Writer.es = Elasticsearch(f'{host}:{port}', **es_options)
+
+    def __init__(self, sid: str) -> None:
+        super().__init__(sid)
+        self.es = Writer.es
+
     def write(self, logentry):
         self.es.index(
             index=self.index, body=logentry, pipeline=self.pipeline

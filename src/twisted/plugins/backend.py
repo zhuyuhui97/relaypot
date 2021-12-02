@@ -9,7 +9,7 @@ from twisted.python import usage
 from relaypot.backend.factory import BackendServerFactory
 from relaypot.frontend.top_service import top_service
 from relaypot.frontend.util import create_endpoint_services
-from relaypot.utils.config import init_common
+from relaypot.utils.config import init_agent, init_common
 from relaypot import utils
 
 
@@ -35,6 +35,7 @@ class MyServiceMaker(object):
         # TODO Rewrite config loader
         utils.options = options
         init_common(options['config'])
+        init_agent()
         self.initProtocol(options)
         return self.topService
 

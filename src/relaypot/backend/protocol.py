@@ -36,7 +36,7 @@ class BackendServerProtocol(LineOnlyReceiver):
         if self.session_info == None:
             self.decode_preamble(line)
             if len(self.resp_to_log) > 0:
-                self._log.info(
+                self._log.debug(
                     'Commiting {count} buffered logs.', count=len(self.resp_to_log))
                 for buf in self.resp_to_log:
                     self.sess_log.on_response(buf)
@@ -45,7 +45,7 @@ class BackendServerProtocol(LineOnlyReceiver):
             req = self.decode_buf(line)
             if req == None:
                 return
-            self._log.info('p -> f -- {buf}', buf=req)
+            self._log.debug('p -> f -- {buf}', buf=req)
             self.agent.on_request(req)
 
     def connectionLost(self, reason: failure.Failure):
@@ -97,10 +97,10 @@ class BackendServerProtocol(LineOnlyReceiver):
             if isinstance(buf, str):
                 buf = buf.encode()
             if self.sess_log == None:
-                self._log.warn(
+                self._log.debug(
                     'Buffering logs when log service is not ready.')
                 self.resp_to_log.append(buf)
             else:
                 self.sess_log.on_response(buf)
-            self._log.info('p <- f -- {buf}', buf=buf)
+            self._log.debug('p <- f -- {buf}', buf=buf)
             self.transport.write(buf)
