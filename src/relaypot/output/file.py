@@ -14,12 +14,15 @@ class Writer(null.Writer):
         Writer.config = utils.global_config['backend']['filelog']
         Writer.basedir = Writer.config['base']
 
-    def __init__(self, sid: str) -> None:
-        super().__init__(sid)
+    def __init__(self, sid: str, sess) -> None:
+        super().__init__(sid, sess)
         self.filepath = os.path.join(Writer.basedir, sid+'.json')
+        self.ofile = open(self.filepath, 'a')
 
     def write(self, logentry):
-        with open(self.filepath, 'a') as f:
-            logentry['timestamp'] = str(logentry['timestamp'])
-            f.write(json.dumps(logentry))
-            f.write('\n')
+        logentry['timestamp'] = str(logentry['timestamp'])
+        self.ofile.write(json.dumps(logentry))
+        self.ofile.write('\n')
+
+    def close(self):
+        self.ofile.close()

@@ -39,8 +39,8 @@ class Writer(null.Writer):
 
         Writer.es = Elasticsearch(f'{host}:{port}', **es_options)
 
-    def __init__(self, sid: str) -> None:
-        super().__init__(sid)
+    def __init__(self, sid: str, sess) -> None:
+        super().__init__(sid, sess)
         self.es = Writer.es
 
     def write(self, logentry):
