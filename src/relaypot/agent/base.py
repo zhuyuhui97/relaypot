@@ -33,7 +33,9 @@ class BaseAgent():
 
     def on_agent_lost(self):
         # TODO Mark reason of loseConnection here!
-        self.fproto.transport.loseConnection()
+        if self.fproto != None:
+            self.fproto.transport.loseConnection()
+            self.fproto = None
 
     def _to_backend(self, buf: bytes):
         raise NotImplementedError
