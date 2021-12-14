@@ -70,7 +70,7 @@ class Agent(BaseAgent):
             self.buf_to_send.clear()
 
     def on_back_failed(self, reason):
-        self._log.error('ASD')
+        self._log.error('Failed connecting to backend device. reason={reason}', reason = reason)
         self.fproto.transport.loseConnection()
         # HACK Dereference manually to avoid memory leak
         self.fproto = None
