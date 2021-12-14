@@ -10,3 +10,4 @@ relaypot.sh.conf
 svc
 scripts/configq
 scripts/test.sh
+etc/elasticsearch-ca.pem

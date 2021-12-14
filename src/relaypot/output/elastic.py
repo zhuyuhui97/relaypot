@@ -1,4 +1,6 @@
 from typing import Any, Dict
+from ssl import create_default_context
+from os import path
 
 from elasticsearch import Elasticsearch, NotFoundError
 
@@ -28,12 +30,15 @@ class Writer(null.Writer):
         port = str(config['port'])
         Writer.index = config['index']
 
+        ca_path = path.join('etc', 'elasticsearch-ca.pem')
+
         es_options: Dict[str, Any] = {
             # 'api_key' : ('Cf1wb3wB5zhXXict03zUA', 'G1NJYETDRayiIUIudt1ZR'),
             'scheme': 'https',
             'use_ssl': True,
             'ssl_show_warn': False,
-            'verify_certs': False
+            'verify_certs': False,
+            'ca_certs': ca_path
         }
         config_keys = config.keys()
         if 'auth_id' in config_keys and 'auth_apikey' in config_keys:
