@@ -1,5 +1,6 @@
 from typing import Tuple
 import json
+from queue import Queue
 
 from twisted.python import failure
 from twisted.internet.protocol import ClientFactory, Protocol
@@ -12,25 +13,17 @@ class BackendClientProtocol(Protocol):
 
     def __init__(self) -> None:
         self._log = Logger()
+        self.fproto = None
+        self.buf_to_send = Queue()
         super().__init__()
 
     def connectionMade(self):
         self.back_addr = self.transport.getPeer()
-        self.setup_log_namespace()
-        self._log.info('Made backend connection {bhost}:{port}.',
-                       bhost=self.back_addr.host, port=self.back_addr.port)
-        self.transport.write(self.encode_info())  # TODO
-        if len(self.fproto.buf_to_send) != 0:
-            self._log.info('Sending {} buffered bytes.'.format(
-                str(len(self.fproto.buf_to_send))))
-            for buf in self.fproto.buf_to_send:
-                self.send_backend(buf)
-            self.fproto.buf_to_send.clear()
 
     def connectionLost(self, reason: failure.Failure):
         self._log.info('Lost backend connection {bhost}:{port}. reason:{reason}',
-                       bhost=self.back_addr.host, 
-                       port=self.back_addr.port, 
+                       bhost=self.back_addr.host,
+                       port=self.back_addr.port,
                        reason=reason)
         super().connectionLost(reason=reason)
         self.fproto.transport.loseConnection()
@@ -38,10 +31,16 @@ class BackendClientProtocol(Protocol):
         # TODO Protocol call <pair>.transport.loseConnection() in self.connectionLost() may make self.connectionLost() called again.
 
     def dataReceived(self, data: bytes):
+        if self.fproto == None:
+            self.buf_to_send.put(data)
+        else:
+            self.sendto_frontend(data)
+
+    def sendto_frontend(self, data):
         self.fproto._log.info('p <- f -- {buf}', buf=data)
         self.fproto.transport.write(data)
 
-    def send_backend(self, buf):
+    def sendto_backend(self, buf):
         self.fproto._log.info('p -> f -- {buf}', buf=buf)
         self.transport.write(self.encode_buf(buf))
 
@@ -49,7 +48,22 @@ class BackendClientProtocol(Protocol):
         self.fproto = fproto
         self.peer_addr = fproto.peer_addr
         self.host_addr = fproto.host_addr
-        
+        self.setup_log_namespace()
+        self._log.info('Made backend connection {bhost}:{port}.',
+                       bhost=self.back_addr.host, port=self.back_addr.port)
+        self.transport.write(self.encode_info())  # TODO Rename
+        # BUG May not drain properly
+        self.drain_f2b_queue()
+        self.drain_b2f_queue()
+
+    def drain_f2b_queue(self):
+        while not self.fproto.buf_to_send.empty():
+            self.sendto_backend(self.fproto.buf_to_send.get())
+
+    def drain_b2f_queue(self):
+        while not self.buf_to_send.empty():
+            self.sendto_frontend(self.buf_to_send.get())
+
     def encode_info(self):
         obj = {
             'dest_ip': self.host_addr.host,

@@ -1,3 +1,5 @@
+from queue import Queue
+
 from twisted.internet.protocol import Protocol
 from twisted.python import failure
 from twisted.logger import Logger
@@ -20,7 +22,7 @@ class FrontendProtocol(Protocol):
         self.backend_host = utils.global_config['backend']['host']
         self.backend_port = utils.global_config['backend']['port']
         self.bproto = None
-        self.buf_to_send = []
+        self.buf_to_send = Queue()
         self.host_addr = self.transport.getHost()
         self.peer_addr = self.transport.getPeer()
         self.setup_log_namespace()
@@ -38,19 +40,20 @@ class FrontendProtocol(Protocol):
 
     def setup_log_namespace(self):
         self._log.namespace = "{basename:<10} p{peer_addr}->f:{fproto_port}".format(
-            basename=self._log_basename, 
-            peer_addr=self.peer_addr.host, 
+            basename=self._log_basename,
+            peer_addr=self.peer_addr.host,
             fproto_port=str(self.host_addr.port))
 
     def setup_backend(self):
-        point = TCP4ClientEndpoint(reactor, self.backend_host, self.backend_port, timeout=20)
+        point = TCP4ClientEndpoint(
+            reactor, self.backend_host, self.backend_port, timeout=20)
         d = connectProtocol(point, BackendClientProtocol())
         d.addCallback(self.on_bproto_connected)
         d.addErrback(self.on_bproto_error)
 
     def on_bproto_connected(self, bproto):
-        self._log.info('Got bproto {}.'.format(str(bproto)))
         self.set_bproto(bproto)
+        self._log.info('Got bproto {}.'.format(str(bproto)))
 
     def on_bproto_error(self, reason):
         self._log.error(
@@ -71,6 +74,6 @@ class FrontendProtocol(Protocol):
     def to_backend(self, buf):
         if self.bproto == None:
             self._log.info('Buffering bytes when bproto is not ready.')
-            self.buf_to_send.append(buf)
+            self.buf_to_send.put(buf)
         else:
-            self.bproto.send_backend(buf)
+            self.bproto.sendto_backend(buf)
