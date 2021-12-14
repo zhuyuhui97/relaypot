@@ -52,12 +52,17 @@ class Agent(BaseAgent):
         # point = TCP4ClientEndpoint(reactor, "127.0.0.1", 2324)
         self.back_device = random.choice(Agent.pool)
         self._log.info('Selected backend device {device}', device=self.back_device)
-        _host = urlparse(self.back_device)
-        point = TCP4ClientEndpoint(reactor, _host.hostname, _host.port)
+        self.parse_pool_str(self.back_device)
+        point = TCP4ClientEndpoint(reactor, self.point[0], self.point[1])
         # BUG CROSS REFERENCE MAY CAUSE MEMORY LEAK
         d = connectProtocol(point, BridgeProtocol(self, self._log))
         d.addCallback(self.on_back_connected)
         d.addErrback(self.on_back_failed)
+    
+    def parse_pool_str(self, pstr:str):
+        _pstr = pstr.split('@')
+        self.cred = _pstr[0].split(':')
+        self.point = _pstr[1].split(':')
 
     def get_info(self):
         return self.back_device
@@ -80,12 +85,12 @@ class Agent(BaseAgent):
         # TODO Process \xff
         if self.STATUS == self.STATUS_REQ_USERNAME:
             if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
-                buf = b'root\r\n'
+                buf = self.cred[0].encode() + b'\r\n'
             else:
                 return
         elif self.STATUS == self.STATUS_REQ_PASSWORD:
             if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
-                buf = b'admin\r\n'
+                buf = self.cred[1].encode() + b'\r\n'
             else:
                 return
         if self.bproto == None:
