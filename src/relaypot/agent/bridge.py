@@ -53,7 +53,7 @@ class Agent(BaseAgent):
         self.back_device = random.choice(Agent.pool)
         self._log.info('Selected backend device {device}', device=self.back_device)
         self.parse_pool_str(self.back_device)
-        point = TCP4ClientEndpoint(reactor, self.point[0], self.point[1])
+        point = TCP4ClientEndpoint(reactor, self.point[0], int(self.point[1]))
         # BUG CROSS REFERENCE MAY CAUSE MEMORY LEAK
         d = connectProtocol(point, BridgeProtocol(self, self._log))
         d.addCallback(self.on_back_connected)
