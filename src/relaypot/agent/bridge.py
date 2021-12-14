@@ -1,4 +1,5 @@
-import hashlib
+import hashlib, random
+from urllib.parse import urlparse
 
 from twisted.internet import protocol
 from twisted.internet import reactor
@@ -7,6 +8,7 @@ from twisted.python import failure
 from twisted.logger import Logger
 
 from relaypot.agent.base import BaseAgent
+from relaypot import utils
 
 
 class BridgeProtocol(protocol.Protocol):
@@ -20,6 +22,8 @@ class BridgeProtocol(protocol.Protocol):
 
     def connectionLost(self, reason: failure.Failure):
         self.agent.on_agent_lost()
+        # HACK Dereference manually to avoid memory leak
+        self.agent = None
 
 
 class Agent(BaseAgent):
@@ -31,6 +35,11 @@ class Agent(BaseAgent):
     STATUS_REQ_PASSWORD = 2
     STATUS_AUTH_DONE = 3
 
+    @staticmethod
+    def pre_init():
+        Agent.config = utils.global_config['backend']['bridge']
+        Agent.pool = Agent.config['pool']
+
     def __init__(self, fproto: protocol.Protocol):
         self.STATUS = self.STATUS_NO_AUTH
         self._log = Logger(namespace=self._log_basename)
@@ -40,10 +49,18 @@ class Agent(BaseAgent):
         self._req_frag = None
         self._resp_frag = None
         # TODO make it NOT hard coded
-        point = TCP4ClientEndpoint(reactor, "127.0.0.1", 2324)
+        # point = TCP4ClientEndpoint(reactor, "127.0.0.1", 2324)
+        self.back_device = random.choice(Agent.pool)
+        self._log.info('Selected backend device {device}', device=self.back_device)
+        _host = urlparse(self.back_device)
+        point = TCP4ClientEndpoint(reactor, _host.hostname, _host.port)
+        # BUG CROSS REFERENCE MAY CAUSE MEMORY LEAK
         d = connectProtocol(point, BridgeProtocol(self, self._log))
         d.addCallback(self.on_back_connected)
         d.addErrback(self.on_back_failed)
+
+    def get_info(self):
+        return self.back_device
 
     def on_back_connected(self, proto):
         self.bproto = proto
@@ -52,9 +69,11 @@ class Agent(BaseAgent):
                 self._to_backend(item)
             self.buf_to_send.clear()
 
-    def on_back_failed(self):
+    def on_back_failed(self, reason):
         self._log.error('ASD')
         self.fproto.transport.loseConnection()
+        # HACK Dereference manually to avoid memory leak
+        self.fproto = None
 
     def on_request(self, buf):
         self.truncate_response(buf)
@@ -83,6 +102,9 @@ class Agent(BaseAgent):
     def on_front_lost(self, reason: failure.Failure):
         if self.bproto != None:
             self.bproto.transport.loseConnection()
+        # HACK Dereference manually to avoid memory leak
+        self.bproto = None
+        self.fproto = None
 
     def _to_backend(self, buf: bytes):
         self.bproto.transport.write(buf)

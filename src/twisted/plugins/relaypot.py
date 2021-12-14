@@ -7,8 +7,7 @@ from twisted.internet import reactor
 from twisted.python import usage
 
 from relaypot.frontend.factory import HoneypotFactory
-from relaypot.frontend.top_service import top_service
-from relaypot.frontend.util import create_endpoint_services
+from relaypot.frontend.util import top_service, create_endpoint_services
 from relaypot.utils.config import init_common
 from relaypot import utils
 

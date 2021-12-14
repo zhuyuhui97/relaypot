@@ -10,12 +10,8 @@ class BackendClientProtocol(Protocol):
 
     _log_basename = 'BCliProto'
 
-    def __init__(self, factory, fproto) -> None:
+    def __init__(self) -> None:
         self._log = Logger()
-        self.factory = factory
-        self.fproto = fproto
-        self.peer_addr = fproto.peer_addr
-        self.host_addr = fproto.host_addr
         super().__init__()
 
     def connectionMade(self):
@@ -38,6 +34,7 @@ class BackendClientProtocol(Protocol):
                        reason=reason)
         super().connectionLost(reason=reason)
         self.fproto.transport.loseConnection()
+        self.fproto = None
         # TODO Protocol call <pair>.transport.loseConnection() in self.connectionLost() may make self.connectionLost() called again.
 
     def dataReceived(self, data: bytes):
@@ -48,6 +45,11 @@ class BackendClientProtocol(Protocol):
         self.fproto._log.info('p -> f -- {buf}', buf=buf)
         self.transport.write(self.encode_buf(buf))
 
+    def set_fproto(self, fproto):
+        self.fproto = fproto
+        self.peer_addr = fproto.peer_addr
+        self.host_addr = fproto.host_addr
+        
     def encode_info(self):
         obj = {
             'dest_ip': self.host_addr.host,
@@ -74,13 +76,3 @@ class BackendClientProtocol(Protocol):
             fproto_port=str(self.host_addr.port),
             bproto_addr=self.back_addr.host,
             bproto_port=self.back_addr.port)
-
-
-class BackendClientFactory(ClientFactory):
-
-    def __init__(self, fproto) -> None:
-        self.fproto = fproto
-        super().__init__()
-
-    def buildProtocol(self, addr: Tuple[str, int]) -> "Protocol":
-        return BackendClientProtocol(self, self.fproto)

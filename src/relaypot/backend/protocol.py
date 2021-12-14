@@ -49,11 +49,15 @@ class BackendServerProtocol(LineOnlyReceiver):
             self.agent.on_request(req)
 
     def connectionLost(self, reason: failure.Failure):
+        # HACK Dereference manually to avoid memory leak
         if self.agent != None:
             self.agent.on_front_lost(reason)
+            self.agent = None
         if self.sess_log != None:
             self.sess_log.on_disconnected()
-        self._log.info("Lost frontend connection. reason:{reason}", reason=reason)
+            self.sess_log = None
+        self._log.info(
+            "Lost frontend connection. reason:{reason}", reason=reason)
 
     def decode_preamble(self, buf):
         self._log.info('Got preamble: buf={buf}', buf=buf)
@@ -61,7 +65,9 @@ class BackendServerProtocol(LineOnlyReceiver):
             self.session_info = json.loads(buf)
             self.setup_log_namespace()
             self.init_agent()
-            self.sess_log = self.db_logger(sid=self.sid, **self.session_info)
+            # HACK CROSS REFERENCE MAY CAUSE MEMORY LEAK
+            self.sess_log = self.db_logger(
+                sid=self.sid, **self.session_info, agent_info=self.agent_info)
         except Exception as e:
             self._log.error(
                 'Failed to parse preamble: buf={buf}, e={e}', buf=buf, e=e)
@@ -70,9 +76,9 @@ class BackendServerProtocol(LineOnlyReceiver):
 
     def setup_log_namespace(self):
         self._log.namespace = '{basename:<10} {sid} p{src_ip}->f{dest_ip}:{dest_port}'.format(
-                sid=self.sid,
-                basename=self._log_basename, 
-                **self.session_info)
+            sid=self.sid,
+            basename=self._log_basename,
+            **self.session_info)
 
     def decode_buf(self, buf):
         try:
@@ -87,7 +93,9 @@ class BackendServerProtocol(LineOnlyReceiver):
             return None
 
     def init_agent(self):
+        # HACK CROSS REFERENCE MAY CAUSE MEMORY LEAK
         self.agent = utils.cls_agent(self)
+        self.agent_info = self.agent.get_info()
         self.agent.on_init()
 
     def send_response(self, buf_seq):

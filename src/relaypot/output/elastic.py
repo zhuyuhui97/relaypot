@@ -7,6 +7,12 @@ from relaypot.output import null
 
 
 class Writer(null.Writer):
+    EV_CLI_SYN = 'relaypot.session.connected'
+    EV_CLI_FIN = 'relaypot.session.disconnected'
+    EV_SRV_RST = 'relaypot.session.srv_reset'
+    EV_CLI_REQ = 'relaypot.session.request'
+    EV_SRV_RSP = 'relaypot.session.response'
+
     index: str = 'relaypot_test'
     pipeline: str = 'geoip'
     es: Any

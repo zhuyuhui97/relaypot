@@ -1,5 +1,9 @@
 from twisted.application import internet
 from twisted.internet import endpoints
+from twisted.application import service
+
+top_service = service.MultiService()
+
 
 def create_endpoint_services(reactor, parent, listen_endpoints, factory):
     for listen_endpoint in listen_endpoints:

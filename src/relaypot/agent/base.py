@@ -11,6 +11,9 @@ class BaseAgent():
     def __init__(self, fproto: protocol.Protocol):
         self.fproto = fproto
 
+    def get_info(self):
+        return None
+
     def on_init(self):
         return None
 
@@ -24,6 +27,8 @@ class BaseAgent():
         self._to_frontend(buf_seq)
 
     def on_front_lost(self, reason: failure.Failure):
+        # HACK Dereference manually to avoid memory leak
+        self.fproto = None
         return None
 
     def on_agent_lost(self):

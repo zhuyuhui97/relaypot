@@ -2,11 +2,10 @@ from twisted.internet.protocol import Protocol
 from twisted.python import failure
 from twisted.logger import Logger
 from twisted.internet import reactor
-from twisted.internet.endpoints import TCP4ClientEndpoint
+from twisted.internet.endpoints import TCP4ClientEndpoint, connectProtocol
 
-from relaypot.frontend.util import create_endpoint_services
-from relaypot.frontend.backend import BackendClientFactory
-from relaypot.frontend.top_service import top_service
+from relaypot.frontend.util import top_service, create_endpoint_services
+from relaypot.frontend.backend import BackendClientProtocol
 from relaypot import utils
 
 
@@ -44,10 +43,8 @@ class FrontendProtocol(Protocol):
             fproto_port=str(self.host_addr.port))
 
     def setup_backend(self):
-        f = BackendClientFactory(self)
-        point = TCP4ClientEndpoint(
-            reactor, self.backend_host, self.backend_port, timeout=20)
-        d = point.connect(f)
+        point = TCP4ClientEndpoint(reactor, self.backend_host, self.backend_port, timeout=20)
+        d = connectProtocol(point, BackendClientProtocol())
         d.addCallback(self.on_bproto_connected)
         d.addErrback(self.on_bproto_error)
 
@@ -56,17 +53,20 @@ class FrontendProtocol(Protocol):
         self.set_bproto(bproto)
 
     def on_bproto_error(self, reason):
-        self._log.info(
+        self._log.error(
             'Failed to connect to backend, closing connection to client: {reason}', reason=reason)
         self.transport.loseConnection()
 
     def set_bproto(self, bproto):
+        # Set bproto.fproto here in case of we lost track of bproto and cause memory leak
         self.bproto = bproto
+        self.bproto.set_fproto(self)
 
     def close_backend(self):
         if self.bproto != None:
             self._log.info('Closing connection to backend.')
             self.bproto.transport.loseConnection()
+            self.bproto = None
 
     def to_backend(self, buf):
         if self.bproto == None:
