@@ -25,6 +25,7 @@ class Writer(null.Writer):
         super().__init__(sid, sess)
         self.filepath = os.path.join(Writer.basedir, sid+'.json')
         self.logs = []
+        self.dl_cmds = []
         self.last_event = {'hash': 'START', 'req': None}
         self.req_frag = 0
         self.rsp_frag = 0
@@ -37,6 +38,8 @@ class Writer(null.Writer):
         elif logentry['eventid'] in [self.EV_CLI_FIN, self.EV_SRV_RST]:
             self.last_event['next_hash'] = 'FIN'
             self.last_event['next_req'] = None
+        elif logentry['eventid'] == self.EV_CLI_UL:
+            self.dl_cmds.append(logentry['cmd'])
         elif logentry['eventid'] in [self.EV_CLI_REQ, self.EV_SRV_RSP]:
             if logentry['eventid'] == self.EV_CLI_REQ:
                 self.req_update += Writer.redis_req.setnx(logentry['hash'], repr(logentry['buf']))
@@ -78,6 +81,7 @@ class Writer(null.Writer):
             'req_update': self.req_update,
             'rsp_frag': self.rsp_frag,
             'rsp_update': self.rsp_update,
+            'dl_cmds': self.dl_cmds,
             'log': self.logs,
         }
         with open(self.filepath, 'a') as of:

@@ -27,10 +27,10 @@ class TelnetHandler:
     @staticmethod
     def pre_init():
         TelnetHandler.dl_cmds = []
-        with open('etc/dl_cmds.txt', 'rb') as dl_cmds_f:
-            TelnetHandler.dl_cmds = dl_cmds_f.readlines()
-        for item in TelnetHandler.dl_cmds:
-            item = item.strip()
+        with open('etc/dl_cmds.txt', 'r') as dl_cmds_f:
+            items = dl_cmds_f.readlines()
+            for item in items:
+                TelnetHandler.dl_cmds.append(item.strip())
 
     def __init__(self, fproto) -> None:
         self.STATUS = self.STATUS_NO_AUTH
@@ -40,7 +40,7 @@ class TelnetHandler:
         self.fproto = fproto
 
     def on_request(self, buf: bytes):
-        self.truncate_response(buf)
+        # self.truncate_response(buf)
         # TODO Process \xff
         if self.STATUS == self.STATUS_REQ_USERNAME:
             if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
@@ -66,7 +66,7 @@ class TelnetHandler:
         return new_buf
 
     def on_response(self, buf: bytes):
-        self.truncate_request(buf)
+        # self.truncate_request(buf)
         self.set_status(buf)
 
     def on_close(self):
@@ -234,8 +234,9 @@ class Agent(BaseAgent):
         # HACK Dereference manually to avoid memory leak
         self.bproto = None
         self.fproto = None
-        self.handler.on_close()
-        self.handler = None
+        if self.handler != None:
+            self.handler.on_close()
+            self.handler = None
 
     def on_agent_lost(self):
         super().on_agent_lost()
