@@ -14,6 +14,7 @@ class Writer(null.Writer):
     EV_SRV_RST = 'relaypot.session.srv_reset'
     EV_CLI_REQ = 'relaypot.session.request'
     EV_SRV_RSP = 'relaypot.session.response'
+    EV_SRV_DL = 'relaypot.file.download'
 
     index: str = 'relaypot_test'
     pipeline: str = 'geoip'

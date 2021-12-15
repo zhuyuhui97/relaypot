@@ -46,6 +46,12 @@ class BaseOutput():
         obj['buf'] = repr(buf)
         obj['hash'] = hashlib.md5(buf).hexdigest()
         self.writer.write(obj)
+    
+    def on_download(self, cmd: str):
+        obj = self.fill_base_info()
+        obj['eventid'] = self.writer.EV_CLI_DL
+        obj['cmd'] = cmd
+        self.writer.write(obj)
 
     def set_base_info(self) -> dict:
         self.base_info = {

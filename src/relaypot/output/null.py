@@ -4,6 +4,7 @@ class Writer():
     EV_SRV_RST = 'server_rst'
     EV_CLI_REQ = 'request'
     EV_SRV_RSP = 'response'
+    EV_SRV_DL = 'download'
 
     @staticmethod
     def pre_init():
