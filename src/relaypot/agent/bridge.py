@@ -136,8 +136,9 @@ class TelnetHandler:
                         # TODO Log download
                         line = self.reassemble_cmd(current)
                         self.fproto.sess_log.on_download(line)
-            for item in current.parts:
-                q.put(item)
+            if hasattr(current, 'parts'):
+                for item in current.parts:
+                    q.put(item)
 
     def reassemble_cmd(self, cmd):
         line = ''
