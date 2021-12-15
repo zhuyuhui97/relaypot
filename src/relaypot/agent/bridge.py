@@ -172,6 +172,7 @@ class Agent(BaseAgent):
     def pre_init():
         Agent.config = utils.global_config['backend']['bridge']
         Agent.pool = Agent.config['pool']
+        TelnetHandler.pre_init()
 
     def __init__(self, fproto: protocol.Protocol):
         self.handler = Agent.cls_handler(fproto)
