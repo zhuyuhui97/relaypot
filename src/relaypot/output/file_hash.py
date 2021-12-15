@@ -38,8 +38,8 @@ class Writer(null.Writer):
         elif logentry['eventid'] in [self.EV_CLI_FIN, self.EV_SRV_RST]:
             self.last_event['next_hash'] = 'FIN'
             self.last_event['next_req'] = None
-        elif logentry['eventid'] == self.EV_CLI_UL:
-            self.dl_cmds.append(logentry['cmd'])
+        elif logentry['eventid'] == self.EV_CLI_DL:
+            self.dl_cmds.append(logentry['cmd'].strip())
         elif logentry['eventid'] in [self.EV_CLI_REQ, self.EV_SRV_RSP]:
             if logentry['eventid'] == self.EV_CLI_REQ:
                 self.req_update += Writer.redis_req.setnx(logentry['hash'], repr(logentry['buf']))
