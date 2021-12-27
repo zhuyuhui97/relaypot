@@ -53,6 +53,12 @@ class BaseOutput():
         obj['cmd'] = cmd
         self.writer.write(obj)
 
+    def on_event(self, event, args):
+        obj = self.fill_base_info()
+        obj['eventid'] = event
+        obj.update(args)
+        self.writer.write(obj)
+
     def set_base_info(self) -> dict:
         self.base_info = {
             'sid': self.sid,
@@ -70,3 +76,4 @@ class BaseOutput():
             'timestamp': self.get_timestamp()
         }
         return obj
+    

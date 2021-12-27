@@ -14,6 +14,8 @@ class Writer(null.Writer):
         self.esw = esw(sid, sess)
 
     def write(self, logentry):
+        if logentry['eventid'] in [self.EV_SRV_RSP, self.EV_CLI_REQ]:
+            return
         self.fhw.write(logentry=logentry)
         self.esw.write(logentry=logentry)
 

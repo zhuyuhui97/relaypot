@@ -40,7 +40,7 @@ class TelnetHandler:
         self.fproto = fproto
 
     def on_request(self, buf: bytes):
-        # self.truncate_response(buf)
+        self.truncate_response(buf)
         # TODO Process \xff
         if self.STATUS == self.STATUS_REQ_USERNAME:
             if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
@@ -66,10 +66,12 @@ class TelnetHandler:
         return new_buf
 
     def on_response(self, buf: bytes):
-        # self.truncate_request(buf)
+        self.truncate_request(buf)
         self.set_status(buf)
 
     def on_close(self):
+        self.truncate_request(None)
+        self.truncate_response(None)
         self.fproto = None
 
     def set_status(self, buf: bytes):
@@ -86,20 +88,26 @@ class TelnetHandler:
         self._linebuf = _lines[-1]
         return _lines[:-1]
 
-    def truncate_request(self, new_resp_buf: bytes):
+    def truncate_request(self, new_resp_buf: bytes or None):
         if self._req_frag != None:
-            self._log.info('TRUNK ' + repr(self._req_frag))
-            self._log.info(hashlib.md5(self._req_frag).hexdigest())
+            args = {
+                'buf': self._req_frag,
+                'hash': hashlib.md5(self._req_frag).hexdigest()
+            }
+            self.fproto.sess_log.on_event(event='req_part', args=args)
             self._req_frag = None
         if self._resp_frag == None:
             self._resp_frag = new_resp_buf
         else:
             self._resp_frag = self._resp_frag + new_resp_buf
 
-    def truncate_response(self, new_req_buf: bytes):
+    def truncate_response(self, new_req_buf: bytes or None):
         if self._resp_frag != None:
-            self._log.info('TRUNK ' + repr(self._resp_frag))
-            self._log.info(hashlib.md5(self._resp_frag).hexdigest())
+            args = {
+                'buf': self._resp_frag,
+                'hash': hashlib.md5(self._resp_frag).hexdigest()
+            }
+            self.fproto.sess_log.on_event(event='resp_part', args=args)
             self._resp_frag = None
         if self._req_frag == None:
             self._req_frag = new_req_buf
