@@ -98,7 +98,7 @@ class TelnetHandler:
             self._req_frag = None
         if self._resp_frag == None:
             self._resp_frag = new_resp_buf
-        else:
+        elif new_resp_buf != None:
             self._resp_frag = self._resp_frag + new_resp_buf
 
     def truncate_response(self, new_req_buf: bytes or None):
@@ -111,7 +111,7 @@ class TelnetHandler:
             self._resp_frag = None
         if self._req_frag == None:
             self._req_frag = new_req_buf
-        else:
+        elif new_req_buf != None:
             self._req_frag = self._req_frag + new_req_buf
 
     def parse_endpoint_str(self, endpoint: str):
