@@ -40,14 +40,14 @@ class Writer(null.Writer):
             self.last_event['next_req'] = None
         elif logentry['eventid'] == self.EV_CLI_DL:
             self.dl_cmds.append(logentry['cmd'].strip())
-        elif logentry['eventid'] in ['req_part', 'resp_part']:
-            if logentry['eventid'] == 'req_part':
+        elif logentry['eventid'] in [self.EV_CLI_REQ, self.EV_SRV_RSP, 'req_part', 'resp_part']:
+            if logentry['eventid'] in [self.EV_CLI_REQ, 'req_part']:
                 self.req_update += Writer.redis_req.setnx(logentry['hash'], repr(logentry['buf']))
                 self.req_frag += 1
-            elif logentry['eventid'] == 'resp_part':
+            elif logentry['eventid'] in [self.EV_SRV_RSP, 'resp_part']:
                 self.rsp_update += Writer.redis_rsp.setnx(logentry['hash'], repr(logentry['buf']))
                 self.rsp_frag += 1
-            is_req = True if logentry['eventid'] == self.EV_CLI_REQ else False
+            is_req = True if logentry['eventid'] in [self.EV_CLI_REQ, 'req_part'] else False
             _logentry = {
                 'prev_hash': self.last_event['hash'],
                 'prev_req': self.last_event['req'],
