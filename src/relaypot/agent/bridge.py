@@ -91,7 +91,7 @@ class TelnetHandler:
     def truncate_request(self, new_resp_buf: bytes or None):
         if self._req_frag != None:
             args = {
-                'buf': self._req_frag,
+                'buf': repr(self._req_frag),
                 'hash': hashlib.md5(self._req_frag).hexdigest()
             }
             self.fproto.sess_log.on_event(event='req_part', args=args)
@@ -104,7 +104,7 @@ class TelnetHandler:
     def truncate_response(self, new_req_buf: bytes or None):
         if self._resp_frag != None:
             args = {
-                'buf': self._resp_frag,
+                'buf': repr(self._resp_frag),
                 'hash': hashlib.md5(self._resp_frag).hexdigest()
             }
             self.fproto.sess_log.on_event(event='resp_part', args=args)
