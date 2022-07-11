@@ -1,4 +1,5 @@
 import yaml
+from yaml import CLoader as Loader
 
 from relaypot import utils
 from relaypot.utils.mods import get_agent_class, get_writer_class
@@ -16,4 +17,4 @@ def init_agent():
 
 def load_config_file(conf_path):
     with open(conf_path) as conffile:
-        utils.global_config = yaml.load(conffile)
+        utils.global_config = yaml.load(conffile, Loader=Loader)
