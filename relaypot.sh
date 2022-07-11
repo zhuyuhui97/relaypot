@@ -1,4 +1,4 @@
-. relaypot.sh.conf
+. ./relaypot.sh.conf
 
 start() {
     if [ ! -z $2 ]; then
@@ -66,12 +66,12 @@ update(){
 init_dirs() {
     if [ ! -d $RUN_DIR ]; then
         sudo mkdir -p $RUN_DIR
-        sudo chown pot:pot $RUN_DIR
+        sudo chown $USER:nogroup $RUN_DIR
     fi
 
     if [ ! -d $LOG_DIR ]; then
         sudo mkdir -p $LOG_DIR
-        sudo chown pot:pot $LOG_DIR
+        sudo chown $USER:nogroup $LOG_DIR
     fi
 }
 $*
