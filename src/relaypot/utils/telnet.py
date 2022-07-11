@@ -1,7 +1,11 @@
 import hashlib
 import re
+from telnetlib import Telnet
 import bashlex
 from twisted.logger import Logger
+import pickle
+from sklearn.feature_extraction.text import CountVectorizer, HashingVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 class TelnetHandler:
     _log_basename = 'TelnetHandler'
@@ -29,29 +33,50 @@ class TelnetHandler:
 
     def on_request(self, buf: bytes):
         self.truncate_response(buf)
+        # Do modification on request buffer
         # TODO Process \xff
         if self.STATUS == self.STATUS_REQ_USERNAME:
-            if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
-                new_buf = self.cred[0].encode() + b'\r\n'
-            else:
-                return None
+            new_buf = self.preproc_username(buf)
         elif self.STATUS == self.STATUS_REQ_PASSWORD:
-            if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
-                new_buf = self.cred[1].encode() + b'\r\n'
-            else:
-                return None
+            new_buf = self.preproc_password(buf)
+        elif self.STATUS == self.STATUS_AUTH_DONE:
+            new_buf = buf
+            self.pending_lines = self.commit_lines(buf)
         else:
             new_buf = buf
+        # Submit request to downstream processor
+        self.submit_req(new_buf)
+        # Extract other information
         if self.STATUS == self.STATUS_AUTH_DONE:
-            lines = self.commit_lines(buf)
-            for line in lines:
-                try:
-                    parsed = self.parse_line(line.decode())
-                    for parsed_item in parsed:
-                        self.get_download(parsed_item)
-                except:
-                    pass
-        return new_buf
+            self.postproc_cmdline(buf)
+        # return new_buf
+
+    def preproc_username(self, buf):
+        if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
+            return self.cred[0].encode() + b'\r\n'
+        else:
+            return None
+
+    def preproc_password(self, buf):
+        if buf.endswith(b'\r\n') or buf.endswith(b'\x00'):
+            return self.cred[1].encode() + b'\r\n'
+        else:
+            return None
+
+    def handle_cmdline(self, buf):
+        pass
+    
+    def submit_req(self, buf):
+        self.pending_req = buf
+
+    def postproc_cmdline(self, buf):
+        for line in self.pending_lines:
+            try:
+                parsed = self.parse_line(line.decode())
+                for parsed_item in parsed:
+                    self.get_download(parsed_item)
+            except:
+                pass
 
     def on_response(self, buf: bytes):
         self.truncate_request(buf)
@@ -144,3 +169,71 @@ class TelnetHandler:
             if item.kind == 'word':
                 line += item.word + ' '
         return line
+
+class TelnetHandlerLIH(TelnetHandler):
+    @staticmethod
+    def pre_init():
+        TelnetHandlerLIH.tokenizer = None
+        TelnetHandlerLIH.hc = None
+        TelnetHandlerLIH.resp_parts_buf = None
+        with open('etc/profiles/req_hc.pkl') as pkl:
+            TelnetHandlerLIH.hc = pickle.load(pkl)
+        with open('etc/profiles/req_tokenizer.pkl') as pkl:
+            TelnetHandlerLIH.tokenizer = pickle.load(pkl)
+        with open('etc/profiles/resp_parts_buf.pkl') as pkl:
+            TelnetHandlerLIH.resp_parts_buf = pickle.load(pkl)
+        pickle.load()
+    
+    def submit_req(self, buf):
+        if self.STATUS == self.STATUS_REQ_USERNAME:
+            pass
+        elif self.STATUS == self.STATUS_REQ_PASSWORD:
+            pass
+        elif self.STATUS == self.STATUS_AUTH_DONE:
+            lines = self.pending_lines
+            self.handle_cmdline(buf)
+            # TODO prepare response here
+        else:
+            pass
+        
+
+    def _tokenizer(self, string: bytes):
+        BYTE_OTHER = 0
+        BYTE_PUNC = 1
+        BYTE_CHAR = 2
+        # if isinsta`nce(string, str):
+        #     string = bytes(string, encoding='latin-1')
+        strlen = len(string)
+        tokens = []
+        _old_type = None
+        for ptr in range(0, strlen):
+            _current = ord(string[ptr])
+            _current_type = BYTE_PUNC
+            if (
+                (_current >= 0x30 and _current <= 0x39)
+                or (_current >= 0x41 and _current <= 0x5A)
+                or (_current >= 0x61 and _current <= 0x7A)
+            ):
+                _current_type = BYTE_CHAR
+            elif _current <= 0x1F and _current >= 0x7F:
+                _current_type = BYTE_OTHER
+            if _current_type == _old_type:
+                tokens[-1] += string[ptr]
+            else:
+                tokens.append(string[ptr])
+            _old_type = _current_type
+        return tokens
+
+    def resp_by_pred(self, pred):
+        return 
+
+    def handle_cmdline(self, buf):
+        tokens = TelnetHandlerLIH.tokenizer.transform([buf])
+        pred = TelnetHandlerLIH.hc.fit_predict(tokens)
+
+
+        bufs = []# TODO 参照ipynb中的向量化过程，使用去掉变动关键词的词典，测算距离。
+        
+    def on_response(self, buf):
+        pass
+    
