@@ -36,8 +36,6 @@ class Writer(null.Writer):
 
         es_options: Dict[str, Any] = {
             # 'api_key' : ('Cf1wb3wB5zhXXict03zUA', 'G1NJYETDRayiIUIudt1ZR'),
-            'scheme': 'https',
-            'use_ssl': True,
             'ssl_show_warn': False,
             'verify_certs': False,
             'ca_certs': ca_path
