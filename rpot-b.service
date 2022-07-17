@@ -1,0 +1,15 @@
+[Unit]
+Description=Relaypot Backend Systemd Integration
+After=network.target
+
+[Service]
+Type=simple
+User=makoto
+WorkingDirectory=/home/pot/relaypot
+Environment=RELAYPOT_HOME=.
+Environment=PYTHONPATH=$PYTHONPATH:./src 
+EnvironmentFile=./relaypot.sh.conf
+ExecStart=twistd -n relaypot-backend -c ./config.yaml
+
+[Install]
+WantedBy=multi-user.target
