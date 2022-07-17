@@ -9,10 +9,13 @@ User=pot
 # Edit this line to set working directory
 WorkingDirectory=/home/pot/relaypot
 Environment=RELAYPOT_HOME=.
-Environment=PYTHONPATH=$PYTHONPATH:./src 
-EnvironmentFile=./relaypot.sh.conf
-# Edit this line to set listening port and config file
-ExecStart=twistd -n relaypot -c ./config.yaml -p 23
+Environment=PYTHONPATH=$PYTHONPATH:./src
+# Edit this line to set listening port
+Environment=PORT=23
+# Edit this line to set config file
+Environment=CFG_FILE=config.yaml
+# Edit this line to set absolute path to twistd
+ExecStart=twistd --pidfile=run/f'${PORT}'.pid -n relaypot -c '${CFG_FILE}' -p '${PORT}'
 
 [Install]
 WantedBy=multi-user.target

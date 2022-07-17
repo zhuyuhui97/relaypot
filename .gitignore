@@ -11,3 +11,4 @@ svc
 scripts/configq
 scripts/test.sh
 etc/elasticsearch-ca.pem
+run/*

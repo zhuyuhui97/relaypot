@@ -9,10 +9,10 @@ User=pot
 # Edit this line to set working directory
 WorkingDirectory=/home/pot/relaypot
 Environment=RELAYPOT_HOME=.
-Environment=PYTHONPATH=$PYTHONPATH:./src 
-EnvironmentFile=./relaypot.sh.conf
+Environment=PYTHONPATH=$PYTHONPATH:./src
 # Edit this line to set config file
-ExecStart=twistd -n relaypot-backend -c ./config.yaml
+Environment=CFG_FILE=config.yaml
+ExecStart=twistd --pidfile=run/b.pid -n relaypot-backend -c '${CFG_FILE}'
 
 [Install]
 WantedBy=multi-user.target
