@@ -1,0 +1,18 @@
+[Unit]
+Description=Relaypot Backend Systemd Integration
+After=network.target
+
+[Service]
+Type=simple
+# Edit this line to set running user
+User=pot
+# Edit this line to set working directory
+WorkingDirectory=/home/pot/relaypot
+Environment=RELAYPOT_HOME=.
+Environment=PYTHONPATH=$PYTHONPATH:./src 
+EnvironmentFile=./relaypot.sh.conf
+# Edit this line to set config file
+ExecStart=twistd -n relaypot-backend -c ./config.yaml
+
+[Install]
+WantedBy=multi-user.target
