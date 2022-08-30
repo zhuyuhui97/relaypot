@@ -86,6 +86,6 @@ Literature works used datasets collected by this code:
     (INFOCOM WKSHPS 2022)
     ([IEEE link](https://ieeexplore.ieee.org/abstract/document/9798307))
 - *Zhu et al.*
-    AndroCreme: Unseen Android Malware Detection Based on Inductive Conformal Learning 
+    Mining Function Homology of Bot Loaders from Honeypot Logs
     (In progress)
     ([arXiv Link](https://arxiv.org/abs/2206.00385))
